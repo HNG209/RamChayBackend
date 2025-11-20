@@ -1,0 +1,29 @@
+{
+  "permissions": [
+    "ADD_PRODUCT",
+    "EDIT_PRODUCT",
+    "DELETE_PRODUCT",
+    "VIEW_ORDER",
+    "MANAGE_CUSTOMER",
+    "CREATE_ORDER"
+  ],
+  "roles": {
+    "ROLE_MANAGER": [
+      "ADD_PRODUCT",
+      "EDIT_PRODUCT",
+      "DELETE_PRODUCT",
+      "VIEW_ORDER"
+    ],
+    "ROLE_CUSTOMER": [
+      "VIEW_ORDER",
+      "CREATE_ORDER"
+    ],
+    "ROLE_ADMIN": [
+      "ADD_PRODUCT",
+      "EDIT_PRODUCT",
+      "DELETE_PRODUCT",
+      "VIEW_ORDER",
+      "MANAGE_CUSTOMER"
+    ]
+  }
+}
