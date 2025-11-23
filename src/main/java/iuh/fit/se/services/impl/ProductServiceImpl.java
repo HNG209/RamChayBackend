@@ -11,6 +11,7 @@ import iuh.fit.se.services.ProductService;
 import jakarta.persistence.Table;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -22,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAuthority('ADD_PRODUCT')")
     public ProductCreationResponse createProduct(ProductCreationRequest productCreationRequest) {
         Category category = Category.builder()
                 .categoryName(productCreationRequest.getCategory().getCategoryName())
