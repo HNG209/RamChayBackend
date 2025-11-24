@@ -15,5 +15,5 @@ public class CartItemCreationRequest {
     double unitPrice;
     double subtotal;
     Long productId;
-    Long cartId;
+//    Long cartId;
 }
