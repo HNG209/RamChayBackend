@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(user.getId().toString())
                 .issuer("RamChay")
                 .issueTime(new Date())
                 .claim("permissions", permissions)
