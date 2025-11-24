@@ -2,6 +2,7 @@ package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.request.CartItemCreationRequest;
 import iuh.fit.se.dtos.response.CartItemCreationResponse;
+import iuh.fit.se.dtos.response.CartItemDeletionResponse;
 import iuh.fit.se.entities.Cart;
 import iuh.fit.se.entities.CartItem;
 import iuh.fit.se.entities.Customer;
@@ -16,6 +17,7 @@ import iuh.fit.se.repositories.ProductRepository;
 import iuh.fit.se.services.CartItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +46,7 @@ public class CartItemServiceImpl implements CartItemService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-
-        CartItem cartItem = cartItemRepository.findCartItemByProductId(product.getId());
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(product.getId(), cart.getId());
         if (cartItem == null) {
             cartItem = new CartItem();
             cartItem.setCart(cart);
@@ -59,5 +60,21 @@ public class CartItemServiceImpl implements CartItemService {
 
         return cartItemMapper.toCartItemCreationResponse(
                 cartItemRepository.save(cartItem));
+    }
+
+    @Override
+    @Transactional
+    public CartItemDeletionResponse deleteCartItem(Long cartItemId, Long customerId) {
+        CartItem cartItem = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+
+        if (!cartItem.getCart().getCustomer().getId().equals(customerId))
+            throw new AppException(ErrorCode.CART_ITEM_INVALID);
+
+        cartItemRepository.deleteById(cartItem.getId());
+
+        return CartItemDeletionResponse.builder()
+                .id(cartItem.getId())
+                .build();
     }
 }

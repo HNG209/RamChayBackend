@@ -8,6 +8,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-     @Query("SELECT c FROM CartItem c WHERE c.product.id = :productId")
-     CartItem findCartItemByProductId(@Param("productId") Long productId);
+     @Query("SELECT c FROM CartItem c WHERE c.product.id = :productId AND c.cart.id = :cartId")
+     CartItem findCartItemByProductIdAndCartId(@Param("productId") Long productId, @Param("cartId") Long cartId);
+
+     // kiem tra cartItem co nam trong gio hang cua customer do khong, neu co thi xoa
+
+
+
 }

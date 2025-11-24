@@ -26,6 +26,8 @@ public enum ErrorCode {
     INVALID_DOB(3003, "invalid date of birth", HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_FOUND(4001, "customer not found", HttpStatus.NOT_FOUND),
     PRODUCT_NOT_FOUND(4002, "product not found", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND(4003, "cart item not found", HttpStatus.NOT_FOUND),
+    CART_ITEM_INVALID(4004, "cart item invalid", HttpStatus.BAD_REQUEST),
     ;
 
 
