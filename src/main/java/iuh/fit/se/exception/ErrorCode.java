@@ -25,6 +25,7 @@ public enum ErrorCode {
     UNAUTHORIZED(4003, "access denied", HttpStatus.FORBIDDEN),
     INVALID_DOB(3003, "invalid date of birth", HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_FOUND(4001, "customer not found", HttpStatus.NOT_FOUND),
+    PRODUCT_NOT_FOUND(4002, "product not found", HttpStatus.NOT_FOUND),
     ;
 
 
