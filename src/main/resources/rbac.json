@@ -18,7 +18,8 @@
     ],
     "ROLE_CUSTOMER": [
       "VIEW_ORDER",
-      "CREATE_ORDER"
+      "CREATE_ORDER",
+      "ADD_PRODUCT"
     ],
     "ROLE_ADMIN": [
       "ADD_CATEGORY",
