@@ -24,7 +24,9 @@ public enum ErrorCode {
     UNAUTHENTICATED(4004, "unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(4003, "access denied", HttpStatus.FORBIDDEN),
     INVALID_DOB(3003, "invalid date of birth", HttpStatus.BAD_REQUEST),
+    CUSTOMER_NOT_FOUND(4001, "customer not found", HttpStatus.NOT_FOUND),
     ;
+
 
     private final int code;
     private final String message;
