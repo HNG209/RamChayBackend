@@ -20,7 +20,6 @@ import iuh.fit.se.services.AuthService;
 import iuh.fit.se.services.RoleService;
 import iuh.fit.se.services.UserService;
 import iuh.fit.se.utils.JwtSecretReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.bcrypt.BCrypt;

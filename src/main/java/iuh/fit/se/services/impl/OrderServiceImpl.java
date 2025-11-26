@@ -1,7 +1,6 @@
 package iuh.fit.se.services.impl;
 import iuh.fit.se.dtos.request.OrderCreationRequest;
 import iuh.fit.se.dtos.response.OrderCreationResponse;
-import iuh.fit.se.entities.Category;
 import iuh.fit.se.entities.Customer;
 import iuh.fit.se.entities.Order;
 import iuh.fit.se.mappers.OrderMapper;
@@ -16,7 +15,6 @@ import org.springframework.web.client.RestClient;
 public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-    private final RestClient.Builder builder;
 
     @Override
     @PreAuthorize("hasRole('CUSTOMER')")
