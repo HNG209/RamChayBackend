@@ -8,6 +8,8 @@ import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
 import iuh.fit.se.dtos.response.LoginResponse;
 import iuh.fit.se.dtos.response.MyProfileResponse;
 import iuh.fit.se.entities.Customer;
+import iuh.fit.se.exception.AppException;
+import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/auth")
@@ -41,16 +45,16 @@ public class AuthController {
                 .httpOnly(true)  // Quan trọng: JS không đọc được
                 .secure(false)   // True nếu chạy https (Production), False nếu chạy localhost
                 .path("/")       // Cookie có hiệu lực toàn server
-                .maxAge(60 * 60) // 1 giờ cho accessToken
+                .maxAge(7 * 24 * 60 * 60)
                 .sameSite("Lax") // Hoặc "None" nếu khác domain, "Lax" nếu cùng domain/subdomain
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)  // Quan trọng: JS không đọc được
-                .secure(false)   // True nếu chạy https (Production), False nếu chạy localhost
-                .path("/")       // Cookie có hiệu lực toàn server
-                .maxAge(7 * 24 * 60 * 60) // 7 ngày cho refreshToken
-                .sameSite("Lax") // Hoặc "None" nếu khác domain, "Lax" nếu cùng domain/subdomain
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
                 .build();
 
         return ResponseEntity.ok()
@@ -68,7 +72,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(false)
                 .path("/")
-                .maxAge(0) // Quan trọng: 0 nghĩa là xóa ngay lập tức
+                .maxAge(0)
                 .build();
 
         ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
@@ -82,6 +86,47 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, deleteAccess.toString())
                 .header(HttpHeaders.SET_COOKIE, deleteRefresh.toString())
                 .body(new ApiResponse(1000, "Đăng xuất thành công", null));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<Void>> refresh(
+            // Lấy cookie refreshToken tự động
+            @CookieValue(name = "refreshToken", required = false) String refreshToken
+    ) throws ParseException, JOSEException {
+
+        // 1. Kiểm tra nếu không có cookie gửi lên
+        if (refreshToken == null) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_MISSING);
+        }
+
+        // 2. Gọi Service để lấy token mới
+        LoginResponse result = authService.refreshToken(refreshToken);
+
+        // 3. Tạo Cookie Access Token mới (Ghi đè cái cũ)
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", result.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        // 4. Tạo Cookie Refresh Token mới (Ghi đè cái cũ)
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", result.getRefreshToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        // 5. Trả về Response (Body rỗng, quan trọng là Header Set-Cookie)
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(ApiResponse.<Void>builder()
+                        .message("Refresh token thành công")
+                        .build());
     }
 
     @GetMapping("/me")

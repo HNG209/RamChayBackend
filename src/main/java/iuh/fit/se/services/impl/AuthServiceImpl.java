@@ -152,6 +152,28 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public LoginResponse refreshToken(String token) throws JOSEException, ParseException {
+        // 1. Kiểm tra hiệu lực của Refresh Token gửi lên
+        SignedJWT signedJWT = verify(token);
+
+        // 2. Lấy User ID từ token (Subject)
+        String userId = signedJWT.getJWTClaimsSet().getSubject();
+
+        // 3. Kiểm tra xem User này còn tồn tại trong DB không (đề phòng user bị xóa)
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // 4. Tạo cặp Token mới (Token Rotation)
+        String newAccessToken = generateToken(user, 1, ChronoUnit.HOURS);
+        String newRefreshToken = generateToken(user, 7, ChronoUnit.DAYS);
+
+        return LoginResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
+
+    @Override
     public MyProfileResponse getMyProfile(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

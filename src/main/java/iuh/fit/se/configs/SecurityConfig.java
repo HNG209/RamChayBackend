@@ -35,9 +35,12 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth // [Giai đoạn 3]: cho phép đi qua nếu là public
                         .requestMatchers(
-                                "/auth/**",
+                                "/auth/login",
+                                "/auth/logout",
+                                "/auth/register",
+                                "/auth/refresh",
                                 "/cart-items/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -47,10 +50,10 @@ public class SecurityConfig {
 
         // Authenticate bằng JWT, tất cả các request đều phải gửi token
         http.oauth2ResourceServer(oauth2 -> oauth2
-                // 1. Gắn bộ tìm kiếm token tùy chỉnh vào đây
+                // [Giai đoạn 1]: tìm kiếm token trong cookies hoặc bearer
                 .bearerTokenResolver(tokenResolver())
 
-                // 2. Decoder và Converter giữ nguyên
+                // [Giai đoạn 2]: parse token
                 .jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(decoder)
                         .jwtAuthenticationConverter(converter())
@@ -97,6 +100,11 @@ public class SecurityConfig {
         DefaultBearerTokenResolver defaultResolver = new DefaultBearerTokenResolver();
 
         return request -> {
+            String requestPath = request.getRequestURI();
+            if (requestPath.contains("/auth/refresh") || requestPath.contains("/auth/logout")) {
+                return null;
+            }
+
             // 1. Thử tìm trong Header trước (cách cũ)
             String token = defaultResolver.resolve(request);
             if (token != null) {

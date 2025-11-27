@@ -23,6 +23,7 @@ public enum ErrorCode {
     BODY_NOT_SPECIFIED(3004, "body not specified", HttpStatus.BAD_REQUEST),
     SESSION_EXPIRED(3005, "Session expired", HttpStatus.UNAUTHORIZED),
     UNAUTHENTICATED(4004, "unauthenticated", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_MISSING(4005, "refresh token missing", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(4003, "access denied", HttpStatus.FORBIDDEN),
     INVALID_DOB(3003, "invalid date of birth", HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_FOUND(4001, "customer not found", HttpStatus.NOT_FOUND),

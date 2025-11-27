@@ -16,4 +16,5 @@ public interface AuthService {
     LoginResponse login(LoginRequest request) throws JOSEException;
     SignedJWT verify(String token) throws JOSEException, ParseException;
     MyProfileResponse getMyProfile(Long id);
+    LoginResponse refreshToken(String token) throws JOSEException, ParseException;
 }
