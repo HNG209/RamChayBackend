@@ -48,7 +48,6 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-        // Authenticate bằng JWT, tất cả các request đều phải gửi token
         http.oauth2ResourceServer(oauth2 -> oauth2
                 // [Giai đoạn 1]: tìm kiếm token trong cookies hoặc bearer
                 .bearerTokenResolver(tokenResolver())
