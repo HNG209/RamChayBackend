@@ -9,6 +9,7 @@ import iuh.fit.se.dtos.request.CustomerRegistrationRequest;
 import iuh.fit.se.dtos.request.LoginRequest;
 import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
 import iuh.fit.se.dtos.response.LoginResponse;
+import iuh.fit.se.dtos.response.MyProfileResponse;
 import iuh.fit.se.entities.Customer;
 import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
@@ -16,6 +17,7 @@ import iuh.fit.se.exception.AppException;
 import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.mappers.CustomerMapper;
 import iuh.fit.se.repositories.CustomerRepository;
+import iuh.fit.se.repositories.UserRepository;
 import iuh.fit.se.services.AuthService;
 import iuh.fit.se.services.RoleService;
 import iuh.fit.se.services.UserService;
@@ -29,14 +31,14 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthServiceImpl implements AuthService {
     private final CustomerRepository customerRepository;
+
+    private final UserRepository userRepository;
     private final UserService userService;
     private final CustomerMapper customerMapper;
     private final RoleService roleService;
@@ -46,12 +48,14 @@ public class AuthServiceImpl implements AuthService {
                            CustomerRepository customerRepository,
                            CustomerMapper customerMapper,
                            RoleService roleService,
-                           UserService userService) {
+                           UserService userService,
+                           UserRepository userRepository) {
         SECRET_KEY = reader.getSecret();
         this.customerRepository = customerRepository;
         this.customerMapper = customerMapper;
         this.roleService = roleService;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -78,42 +82,50 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) throws JOSEException {
         User user = userService.findByUsername(request.getUsername());
 
-        user.getRoles().forEach(System.out::println);
-
         if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.PASSWORD_INVALID);
         }
 
-        String token = generateToken(user);
+        String refreshToken = generateToken(user, 7, ChronoUnit.DAYS);
+        String accessToken = generateToken(user, 1, ChronoUnit.HOURS);
 
         return LoginResponse.builder()
-                .token(token)
+                .refreshToken(refreshToken)
+                .accessToken(accessToken)
                 .message("Đăng nhập thành công")
                 .build();
     }
 
-    public String generateToken(User user) throws JOSEException {
+    private String generateToken(User user, long amount, ChronoUnit unit) throws JOSEException {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
-        Set<String> permissions = new HashSet<>();
 
-        for (Role role : user.getRoles()) {
-            role.getPermissions().forEach(p -> permissions.add(p.getName()));
+        // Thu thập permissions
+        Set<String> permissions = new HashSet<>();
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                if (role.getPermissions() != null) {
+                    role.getPermissions().forEach(p -> permissions.add(p.getName()));
+                }
+            }
         }
 
+        // List roles
+        List<String> roles = user.getRoles() != null
+                ? user.getRoles().stream().map(Role::getName).toList()
+                : new ArrayList<>();
+
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getId().toString())
+                .subject(user.getId().toString()) // Subject là User ID
                 .issuer("RamChay")
                 .issueTime(new Date())
                 .claim("permissions", permissions)
-                .claim("roles", user.getRoles()
-                        .stream()
-                        .map(Role::getName)
-                        .toList())
+                .claim("roles", roles)
                 .jwtID(UUID.randomUUID().toString())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()
+                        Instant.now().plus(amount, unit).toEpochMilli()
                 ))
                 .build();
+
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
         jwsObject.sign(new MACSigner(SECRET_KEY.getBytes(StandardCharsets.UTF_8)));
@@ -137,5 +149,58 @@ public class AuthServiceImpl implements AuthService {
             throw new BadCredentialsException("Bad token");
 
         return signedJWT;
+    }
+
+    @Override
+    public LoginResponse refreshToken(String token) throws JOSEException, ParseException {
+        // 1. Kiểm tra hiệu lực của Refresh Token gửi lên
+        SignedJWT signedJWT = verify(token);
+
+        // 2. Lấy User ID từ token (Subject)
+        String userId = signedJWT.getJWTClaimsSet().getSubject();
+
+        // 3. Kiểm tra xem User này còn tồn tại trong DB không (đề phòng user bị xóa)
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // 4. Tạo cặp Token mới (Token Rotation)
+        String newAccessToken = generateToken(user, 1, ChronoUnit.HOURS);
+        String newRefreshToken = generateToken(user, 7, ChronoUnit.DAYS);
+
+        return LoginResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
+
+    @Override
+    public MyProfileResponse getMyProfile(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Set<String> permissions = new HashSet<>();
+        if (user.getRoles() != null) {
+            for (Role role : user.getRoles()) {
+                if (role.getPermissions() != null) {
+                    role.getPermissions().forEach(p -> permissions.add(p.getName()));
+                }
+            }
+        }
+
+        MyProfileResponse response = MyProfileResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .roles(user.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toSet()))
+                .permissions(permissions)
+                .build();
+
+        if (user instanceof Customer customer) {
+            response.setFullName(customer.getFullName());
+            response.setAddresses(customer.getAddresses());
+        }
+
+        return response;
     }
 }
