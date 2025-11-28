@@ -30,6 +30,10 @@ public enum ErrorCode {
     PRODUCT_NOT_FOUND(4002, "product not found", HttpStatus.NOT_FOUND),
     CART_ITEM_NOT_FOUND(4003, "cart item not found", HttpStatus.NOT_FOUND),
     CART_ITEM_INVALID(4004, "cart item invalid", HttpStatus.BAD_REQUEST),
+    CART_NOT_FOUND(4005, "cart not found", HttpStatus.NOT_FOUND),
+    CART_EMPTY(4006, "cart is empty", HttpStatus.BAD_REQUEST),
+    PRODUCT_OUT_OF_STOCK(4007, "product out of stock", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_FOUND(4008, "order not found", HttpStatus.NOT_FOUND),
     ;
 
 

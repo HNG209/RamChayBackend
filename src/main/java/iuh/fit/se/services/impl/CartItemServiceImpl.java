@@ -33,30 +33,34 @@ public class CartItemServiceImpl implements CartItemService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
 
-        Cart cart = cartRepository.findCartByCustomerId(customerId);
+        // Dùng Optional để tìm cart, nếu không có thì tạo mới
+        Cart cart = cartRepository.findCartByCustomerId(customerId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setCustomer(customer);
+                    return cartRepository.save(newCart);
+                });
 
-        // Truong hop Cart chua ton tai, tao moi
-        if (cart == null) {
-            cart = new Cart();
-            cart.setCustomer(customer); // getUser by token
-            cart = cartRepository.save(cart);
-        }
 
         //findProductById
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(product.getId(), cart.getId());
-        if (cartItem == null) {
-            cartItem = new CartItem();
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-            cartItem.setQuantity(request.getQuantity());
-        } else {
-            cartItem.setQuantity(
-                    cartItem.getQuantity() + request.getQuantity()
-            );
-        }
+        CartItem cartItem = cartItemRepository
+                .findCartItemByProductIdAndCartId(product.getId(), cart.getId())
+                .map(item -> {
+                    // Nếu đã có => cập nhật quantity
+                    item.setQuantity(item.getQuantity() + request.getQuantity());
+                    return item;
+                })
+                .orElseGet(() -> {
+                    // Nếu chưa có => tạo mới
+                    CartItem newItem = new CartItem();
+                    newItem.setCart(cart);
+                    newItem.setProduct(product);
+                    newItem.setQuantity(request.getQuantity());
+                    return newItem;
+                });
 
         return cartItemMapper.toCartItemCreationResponse(
                 cartItemRepository.save(cartItem));

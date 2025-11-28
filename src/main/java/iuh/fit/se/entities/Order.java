@@ -52,4 +52,13 @@ public class Order {
     // Một đơn hàng có nhiều chi tiết
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderDetail> orderDetails;
+
+    // Thiết lập giá trị mặc định trước khi lưu vào cơ sở dữ liệu
+    @PrePersist
+    protected void onCreate() {
+        orderDate = LocalDateTime.now();
+        if (orderStatus == null) {
+            orderStatus = OrderStatus.PENDING_PAYMENT;
+        }
+    }
 }
