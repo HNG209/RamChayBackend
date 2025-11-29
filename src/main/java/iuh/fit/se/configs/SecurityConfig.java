@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth // [Giai đoạn 3]: cho phép đi qua nếu là public
                         .requestMatchers(
+                                "/managers/**",
                                 "/auth/login",
                                 "/auth/logout",
                                 "/auth/register",
