@@ -4,33 +4,26 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "products")
-public class Product {
+@Table(name = "media_files")
+public class Media {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
+    @Column(name = "media_id")
     Long id;
 
-    String name;
+    @Column(name = "public_id")
+    String publicId;
 
-    String description;
-
-    double price;
-
-    int stock;
+    @Column(name = "secure_url")
+    String secureUrl;
 
     @ManyToOne
-    @JoinColumn(name = "category_id")
-    Category category;
-
-    @OneToMany(mappedBy = "product")
-    Set<Media> mediaFiles;
+    @JoinColumn(name = "product_id")
+    Product product;
 }
