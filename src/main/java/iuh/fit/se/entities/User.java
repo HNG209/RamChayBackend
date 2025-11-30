@@ -29,8 +29,8 @@ public class User { // Super class: lớp cha
     @Column(nullable = false)
     String password;
 
-//    @Column(name = "is_active")
-//    boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;   // default true
 
     @Column(name = "full_name")
     String fullName;

@@ -1,7 +1,11 @@
 package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.request.ManagerCreationRequest;
+import iuh.fit.se.dtos.request.ManagerDeleteRequest;
+import iuh.fit.se.dtos.request.ManagerUpdateRequest;
 import iuh.fit.se.dtos.response.ManagerCreationResponse;
+import iuh.fit.se.dtos.response.ManagerDeleteResponse;
+import iuh.fit.se.dtos.response.ManagerUpdateResponse;
 import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.exception.AppException;
@@ -51,4 +55,38 @@ public class UserServiceImpl implements UserService {
 
         return managerMapper.toManagerCreationResponse(userSaved);
     }
+
+    @Override
+    @PreAuthorize("hasAuthority('DELETE_MANAGER')")
+    public ManagerDeleteResponse deleteManager(ManagerDeleteRequest managerDeleteRequest) {
+
+        User user = userRepository.findById(managerDeleteRequest.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        user.setActive(false);
+        userRepository.save(user);
+        return managerMapper.toManagerDeleteResponse(user);
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('UPDATE_MANAGER')")
+    public ManagerUpdateResponse updateManager(Long id, ManagerUpdateRequest request) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.getFullName() != null)
+            user.setFullName(request.getFullName());
+
+        if (request.isActive())
+            user.setActive(request.isActive());
+
+        if (request.getUsername() != null)
+            user.setUsername(request.getUsername());
+
+        userRepository.save(user);
+
+        return managerMapper.toManagerUpdateResponse(user);
+    }
+
 }
