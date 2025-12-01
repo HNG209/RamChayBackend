@@ -5,6 +5,7 @@ import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.OrderCreationResponse;
 import iuh.fit.se.services.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -19,17 +20,25 @@ public class OrderController {
     private final OrderService orderService;
 
     /**
-     * Tạo đơn hàng mới từ giỏ hàng của khách hàng hiện tại.
-     * @param request
-     * @param jwt
-     * @return
+     * Tạo đơn hàng mới từ các items được chọn trong giỏ hàng.
+     * Hỗ trợ cả khách hàng đăng nhập và khách vãng lai.
+     * - Nếu có JWT: customerId lấy từ JWT, lấy items từ cart của customer
+     * - Nếu không có JWT: khách vãng lai, phải cung cấp đầy đủ thông tin người nhận
+     * @param request Thông tin đơn hàng
+     * @param authentication Authentication object (có thể null cho khách vãng lai)
+     * @return OrderCreationResponse
      * @author Duc
-     * @date 11/26/2025     */
+     * @date 12/01/2024
+     */
     @PostMapping
     public ApiResponse<OrderCreationResponse> createOrder(@RequestBody OrderCreationRequest request,
-                                                          @AuthenticationPrincipal Jwt jwt) {
+                                                          Authentication authentication) {
+        // Lấy customerId từ JWT nếu user đã đăng nhập, null nếu là khách vãng lai
+        Long customerId = null;
+        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+            customerId = Long.valueOf(jwt.getSubject());
+        }
 
-        Long customerId = Long.valueOf(jwt.getSubject());
         return ApiResponse.<OrderCreationResponse>builder()
                 .result(orderService.createOrder(request, customerId))
                 .build();

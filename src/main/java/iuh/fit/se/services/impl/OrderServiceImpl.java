@@ -24,55 +24,72 @@ import java.util.List;
 public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
-    private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
 
     /**
-     * Tạo đơn hàng mới từ giỏ hàng của khách hàng. Sau khi tạo đơn hàng thành công, các mục trong giỏ hàng sẽ bị xóa.
-     * Trả về DTO của đơn hàng đã tạo để frontend hiển thị.
+     * Tạo đơn hàng mới từ các items được chọn trong giỏ hàng.
+     * Sau khi tạo đơn hàng thành công, các mục đã chọn sẽ bị xóa khỏi giỏ hàng.
+     * Hỗ trợ cả khách hàng đăng nhập và khách vãng lai.
      * @param request
-     * @param customerId
+     * @param customerId - Có thể null cho khách vãng lai
      * @return
      * @author Duc
-     * @date 11/26/2025     */
+     * @date 12/01/2024
+     */
+    // Bỏ PreAuthorize để hỗ trợ cả khách vãng lai
     @Override
-    @PreAuthorize("hasRole('CUSTOMER')")
     @Transactional
     public OrderCreationResponse createOrder(OrderCreationRequest request, Long customerId)
     {
-        // 1. Lấy Cart của customer
-        Cart cart = cartRepository.findCartByCustomerId(customerId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        // 1. Validate: nếu có customerId thì phải có trong DB
+        Customer customer = null;
+        if (customerId != null) {
+            customer = Customer.builder().id(customerId).build();
+        }
 
-        // 2. Lấy danh sách CartItem
-        List<CartItem> cartItems = cart.getCartItems();
-        if (cartItems == null || cartItems.isEmpty()) {
+        // 2. Validate items không rỗng
+        if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new AppException(ErrorCode.CART_EMPTY);
         }
 
         // 3. Tạo Order
         Order order = Order.builder()
-                .customer(Customer.builder().id(customerId).build())
+                .customer(customer)
+                .receiverName(request.getReceiverName())
+                .receiverPhone(request.getReceiverPhone())
                 .shippingAddress(request.getShippingAddress())
-                .customerPhone(request.getCustomerPhone())
                 .paymentMethod(request.getPaymentMethod())
                 .orderStatus(OrderStatus.PENDING_PAYMENT)
                 .build();
 
-        // 4. Tạo OrderDetail từ CartItem
+        // 4. Tạo OrderDetail từ các items được chọn
         List<OrderDetail> orderDetails = new ArrayList<>();
+        List<CartItem> cartItemsToDelete = new ArrayList<>();
         double total = 0.0;
 
-        for (CartItem cartItem : cartItems) {
+        for (var itemRequest : request.getItems()) {
+            // Lấy CartItem theo ID
+            CartItem cartItem = cartItemRepository.findById(itemRequest.getCartItemId())
+                    .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+
             Product product = cartItem.getProduct();
 
-            // Validate product tồn tại và còn hàng
+            // Validate product tồn tại
             if (product == null) {
                 throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
-            if (product.getStock() < cartItem.getQuantity()) {
+            // Validate số lượng yêu cầu không vượt quá số lượng trong cart
+            if (itemRequest.getQuantity() > cartItem.getQuantity()) {
+                log.error("Requested quantity {} exceeds cart quantity {} for product {}",
+                        itemRequest.getQuantity(), cartItem.getQuantity(), product.getName());
+                throw new AppException(ErrorCode.INVALID_QUANTITY);
+            }
+
+            // Validate số lượng tồn kho
+            if (product.getStock() < itemRequest.getQuantity()) {
                 log.error("Product {} is out of stock. Available: {}, Requested: {}",
-                    product.getName(), product.getStock(), cartItem.getQuantity());
+                        product.getName(), product.getStock(), itemRequest.getQuantity());
                 throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
             }
 
@@ -80,7 +97,7 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
             OrderDetail orderDetail = OrderDetail.builder()
                     .order(order)
                     .product(product)
-                    .quantity(cartItem.getQuantity())
+                    .quantity(itemRequest.getQuantity())
                     .unitPrice(product.getPrice()) // Lấy giá hiện tại của product
                     .build();
 
@@ -90,7 +107,16 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
             total += orderDetail.getQuantity() * orderDetail.getUnitPrice();
 
             // Giảm số lượng sản phẩm trong kho
-            product.setStock(product.getStock() - cartItem.getQuantity());
+            product.setStock(product.getStock() - itemRequest.getQuantity());
+
+            // Cập nhật hoặc xóa CartItem
+            if (itemRequest.getQuantity().equals(cartItem.getQuantity())) {
+                // Nếu đặt hết số lượng trong cart thì xóa cart item
+                cartItemsToDelete.add(cartItem);
+            } else {
+                // Nếu đặt một phần thì giảm số lượng trong cart
+                cartItem.setQuantity(cartItem.getQuantity() - itemRequest.getQuantity());
+            }
         }
 
         // 5. Set orderDetails và total cho order
@@ -100,11 +126,14 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
         // 6. Lưu order (cascade sẽ lưu orderDetails)
         Order savedOrder = orderRepository.save(order);
 
-        // 7. Xóa các CartItem đã checkout
-        cartItemRepository.deleteAll(cartItems);
+        // 7. Xóa các CartItem đã checkout hoàn toàn
+        if (!cartItemsToDelete.isEmpty()) {
+            cartItemRepository.deleteAll(cartItemsToDelete);
+        }
 
-        log.info("Order created successfully. OrderId: {}, Total: {}, Items: {}",
-            savedOrder.getId(), savedOrder.getTotal(), orderDetails.size());
+        log.info("Order created successfully. OrderId: {}, Total: {}, Items: {}, Customer: {}",
+                savedOrder.getId(), savedOrder.getTotal(), orderDetails.size(),
+                customerId != null ? customerId : "Guest");
 
         return orderMapper.toOrderCreationResponse(savedOrder);
     }
