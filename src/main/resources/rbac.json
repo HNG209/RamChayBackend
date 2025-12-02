@@ -7,7 +7,12 @@
     "VIEW_ORDER",
     "MANAGE_CUSTOMER",
     "CREATE_ORDER",
-    "ADD_MANAGER"
+    "ADD_MANAGER",
+    "DELETE_MANAGER",
+    "UPDATE_MANAGER",
+    "SEARCH_MANAGER",
+    "FIND_MANAGER",
+    "PAGE_MANAGER"
   ],
   "roles": {
     "ROLE_MANAGER": [
@@ -29,7 +34,12 @@
       "DELETE_PRODUCT",
       "VIEW_ORDER",
       "MANAGE_CUSTOMER",
-      "ADD_MANAGER"
+      "ADD_MANAGER",
+      "DELETE_MANAGER",
+      "UPDATE_MANAGER",
+      "SEARCH_MANAGER",
+      "FIND_MANAGER",
+      "PAGE_MANAGER"
     ]
   }
 }

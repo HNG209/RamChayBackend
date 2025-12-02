@@ -1,4 +1,5 @@
-package iuh.fit.se.dtos.request;
+package iuh.fit.se.dtos.response;
+
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,10 +9,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ManagerCreationRequest {
-    String username;
+public class ManagerUpdateResponse {
+    Long id;
     String fullName;
     boolean active;
-    String password;
-    Long roleId;
+    String username;
+
 }

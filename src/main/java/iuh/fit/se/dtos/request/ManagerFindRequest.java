@@ -8,10 +8,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ManagerCreationRequest {
-    String username;
-    String fullName;
-    boolean active;
-    String password;
-    Long roleId;
+public class ManagerFindRequest {
+    Long id;
 }
