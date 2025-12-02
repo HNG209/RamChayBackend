@@ -38,15 +38,19 @@ public class Order {
     @Column(name = "payment_method")
     PaymentMethod paymentMethod;
 
+    @Column(name = "receiver_name")
+    String receiverName;
+
+    @Column(name = "receiver_phone")
+    String receiverPhone;
+
     @Column(name = "shipping_address")
     String shippingAddress;
 
-    @Column(name = "customer_phone")
-    String customerPhone;
-
     // Một khách hàng có thể có nhiều đơn hàng
+    // Cho phép customer null để xử lý trường hợp khách vãng lai
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", nullable = true)
     Customer customer;
 
     // Một đơn hàng có nhiều chi tiết

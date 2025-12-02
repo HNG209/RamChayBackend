@@ -43,6 +43,7 @@ public class SecurityConfig {
                                 "/auth/register",
                                 "/auth/refresh",
                                 "/cart-items/**",
+                                "/orders", // Cho phép khách vãng lai tạo đơn hàng
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html").permitAll() // Không cần điền context path /api

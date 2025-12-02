@@ -1,7 +1,5 @@
 package iuh.fit.se.dtos.response;
 
-import iuh.fit.se.entities.Customer;
-import iuh.fit.se.entities.OrderDetail;
 import iuh.fit.se.entities.enums.OrderStatus;
 import iuh.fit.se.entities.enums.PaymentMethod;
 import lombok.*;
@@ -26,11 +24,15 @@ public class OrderCreationResponse {
 
     PaymentMethod paymentMethod;
 
+    String receiverName;
+
+    String receiverPhone;
+
     String shippingAddress;
 
-    String customerPhone;
+    // Thông tin khách hàng (null nếu là khách vãng lai)
+    CustomerInOrderResponse customer;
 
-    Customer customer;
-
-    List<OrderDetail> orderDetails;
+    // Danh sách chi tiết đơn hàng
+    List<OrderDetailResponse> orderDetails;
 }
