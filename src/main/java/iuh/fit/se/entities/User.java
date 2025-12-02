@@ -32,6 +32,9 @@ public class User { // Super class: lớp cha
 //    @Column(name = "is_active")
 //    boolean isActive;
 
+    @Column(name = "full_name")
+    String fullName;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     LocalDateTime createdAt;
