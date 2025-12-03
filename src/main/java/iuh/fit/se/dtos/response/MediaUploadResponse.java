@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MediaUploadResponse {
+    Long id;
     String publicId;
     String secureUrl;
 }

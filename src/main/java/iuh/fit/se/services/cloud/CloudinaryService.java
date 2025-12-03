@@ -28,4 +28,10 @@ public class CloudinaryService {
                 .build();
 
     }
+
+    public void deleteImage(String publicId) throws IOException {
+        if (publicId != null && !publicId.isEmpty()) {
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        }
+    }
 }

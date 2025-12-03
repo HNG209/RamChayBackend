@@ -9,4 +9,12 @@ import java.util.List;
 
 public interface ProductService {
     ProductCreationResponse createProduct(ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException;
+
+    List<ProductCreationResponse> getAllProducts();
+
+    ProductCreationResponse getProductById(Long id);
+
+    void deleteProduct(Long productId) throws IOException;
+
+    ProductCreationResponse updateProduct(Long productId, ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException;
 }

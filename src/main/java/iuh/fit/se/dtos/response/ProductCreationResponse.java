@@ -3,6 +3,8 @@ package iuh.fit.se.dtos.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,4 +16,7 @@ public class ProductCreationResponse {
     String description;
     double price;
     int stock;
+    String imageUrl;
+    CategoryCreationResponse category;
+    List<MediaUploadResponse> mediaList;
 }

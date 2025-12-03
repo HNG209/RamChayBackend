@@ -11,9 +11,11 @@ import iuh.fit.se.dtos.response.ProductCreationResponse;
 import iuh.fit.se.services.ProductService;
 import iuh.fit.se.services.cloud.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -47,6 +49,47 @@ public class ProductController {
 
         return ApiResponse.<ProductCreationResponse>builder()
                 .result(productService.createProduct(request, images))
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<List<ProductCreationResponse>> getAllProducts() {
+        return ApiResponse.<List<ProductCreationResponse>>builder()
+                .result(productService.getAllProducts())
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<ProductCreationResponse> getProductById(@PathVariable Long id) {
+        return ApiResponse.<ProductCreationResponse>builder()
+                .result(productService.getProductById(id))
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteProduct(@PathVariable Long id) throws IOException {
+        productService.deleteProduct(id);
+        return ApiResponse.<String>builder()
+                .result("Xóa sản phẩm thành công")
+                .build();
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ApiResponse<ProductCreationResponse> updateProduct (
+            @PathVariable Long id,
+            @Parameter(schema = @Schema(implementation = ProductCreationRequest.class))
+            @RequestPart("product") String productString,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) throws IOException {
+
+        ProductCreationRequest request = null;
+        try {
+            request = objectMapper.readValue(productString, ProductCreationRequest.class);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Dữ liệu JSON sản phẩm không hợp lệ!");
+        }
+
+        return ApiResponse.<ProductCreationResponse>builder()
+                .result(productService.updateProduct(id, request, images))
                 .build();
     }
 }
