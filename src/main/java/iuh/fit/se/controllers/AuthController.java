@@ -78,6 +78,38 @@ public class AuthController {
                         .build());
     }
 
+    @PostMapping("/admin-login")
+    public ResponseEntity<?> adminLogin(
+            @RequestBody LoginRequest request) throws JOSEException {
+        LoginResponse loginResponse = authService.adminLogin(request);
+
+        String refreshToken = loginResponse.getRefreshToken();
+        String accessToken = loginResponse.getAccessToken();
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)  // Quan trọng: JS không đọc được
+                .secure(false)   // True nếu chạy https (Production), False nếu chạy localhost
+                .path("/")       // Cookie có hiệu lực toàn server
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax") // Hoặc "None" nếu khác domain, "Lax" nếu cùng domain/subdomain
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(ApiResponse.<LoginResponse>builder()
+                        .result(loginResponse)
+                        .build());
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         // Tạo cookie rỗng với thời gian sống = 0 để xóa

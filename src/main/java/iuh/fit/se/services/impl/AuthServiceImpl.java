@@ -115,6 +115,32 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Override
+    public LoginResponse adminLogin(LoginRequest request) throws JOSEException {
+        User user = userService.findByUsername(request.getUsername());
+
+        if (user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+
+        user.getRoles().forEach(role -> {
+            if(role.getName().contains("ROLE_CUSTOMER"))
+                throw new AppException(ErrorCode.CUSTOMER_NOT_ALLOWED);
+        });
+
+        if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_INVALID);
+        }
+
+        String refreshToken = generateToken(user, 7, ChronoUnit.DAYS);
+        String accessToken = generateToken(user, 1, ChronoUnit.HOURS);
+
+        return LoginResponse.builder()
+                .refreshToken(refreshToken)
+                .accessToken(accessToken)
+                .message("Đăng nhập thành công vào tài khoản quản trị")
+                .build();
+    }
+
     private String generateToken(User user, long amount, ChronoUnit unit) throws JOSEException {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS256);
 

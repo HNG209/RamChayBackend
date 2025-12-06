@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/managers/**",
                                 "/auth/login",
+                                "/auth/admin-login",
                                 "/auth/logout",
                                 "/auth/register",
                                 "/auth/refresh",
