@@ -35,6 +35,7 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(4007, "product out of stock", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(4008, "order not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(4009, "invalid quantity", HttpStatus.BAD_REQUEST),
+
     ;
 
 
