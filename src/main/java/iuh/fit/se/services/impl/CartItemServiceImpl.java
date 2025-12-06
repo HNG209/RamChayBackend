@@ -80,8 +80,13 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        if (!cartItem.getCart().getCustomer().getId().equals(customerId))
-            throw new AppException(ErrorCode.CART_ITEM_INVALID);
+        Customer customer = cartItem.getCart().getCustomer();
+        Long ownerId = customer != null ? customer.getId() : null;
+
+        // Nếu item đã có trong giỏ hàng của 1 user thì không được phép xoá (Integrity)
+        // Nếu là khách vãng lai (ownerId = null) thì xoá là hợp lệ cho bất kì người nào
+        if(ownerId != null && !ownerId.equals(customerId))
+            throw new AppException(ErrorCode.OWNERSHIP_INVALID);
 
         cartItemRepository.deleteById(cartItem.getId());
 
@@ -117,8 +122,11 @@ public class CartItemServiceImpl implements CartItemService {
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_INVALID));
 
-        Long ownerId = item.getCart().getCustomer().getId();
+        Customer customer = item.getCart().getCustomer();
+        Long ownerId = customer != null ? customer.getId() : null;
 
+        // Nếu item đã có trong giỏ hàng của 1 user thì không được phép sửa (Integrity)
+        // Nếu là khách vãng lai (ownerId = null) thì sửa là hợp lệ cho bất kì người nào
         if(ownerId != null && !ownerId.equals(customerId))
             throw new AppException(ErrorCode.OWNERSHIP_INVALID);
 

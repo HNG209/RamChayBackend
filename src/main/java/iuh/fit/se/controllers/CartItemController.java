@@ -37,9 +37,13 @@ public class CartItemController {
     public ApiResponse<CartItemDeletionResponse> deleteCartItem(
             @PathVariable("id") Long cartItemId,
             @AuthenticationPrincipal Jwt jwt) {
-        Long customerId = Long.valueOf(jwt.getSubject());
+        Long userId = null;
+
+        if (jwt != null)
+            userId = Long.valueOf(jwt.getSubject());
+
         return ApiResponse.<CartItemDeletionResponse>builder()
-                .result(cartItemService.deleteCartItem(cartItemId, customerId))
+                .result(cartItemService.deleteCartItem(cartItemId, userId))
                 .build();
     }
 
