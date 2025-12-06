@@ -38,20 +38,18 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @PreAuthorize("hasAuthority('ADD_PRODUCT')")
     public ProductCreationResponse createProduct(ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException {
+        String categoryName = productCreationRequest.getCategory().getCategoryName();
 
-        Category category = Category.builder()
-                .categoryName(productCreationRequest.getCategory().getCategoryName())
-                .description(productCreationRequest.getCategory().getDescription())
-                .build();
-
-        Category savedCategory = categoryRepository.save(category);
+        Category existingCategory = categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
 
         Product product = Product.builder()
                 .name(productCreationRequest.getName())
                 .description(productCreationRequest.getDescription())
-                .category(savedCategory)
+                .category(existingCategory)
                 .price(productCreationRequest.getPrice())
                 .stock(productCreationRequest.getStock())
+                .unit(productCreationRequest.getUnit())
                 .build();
 
         Product savedProduct = productRepository.save(product);
@@ -127,6 +125,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(productCreationRequest.getDescription());
         product.setPrice(productCreationRequest.getPrice());
         product.setStock(productCreationRequest.getStock());
+        product.setUnit(productCreationRequest.getUnit());
 
         Category currentCategory = product.getCategory();
         if (currentCategory != null) {

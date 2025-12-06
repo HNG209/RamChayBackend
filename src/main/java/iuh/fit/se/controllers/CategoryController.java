@@ -7,6 +7,8 @@ import iuh.fit.se.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/categories")
 @CrossOrigin(origins = "*")
@@ -21,5 +23,19 @@ public class CategoryController {
                 .build();
     }
 
+    @GetMapping
+    public ApiResponse<List<CategoryCreationResponse>> getAllCategories() {
+        return ApiResponse.<List<CategoryCreationResponse>>builder()
+                .result(categoryService.getAllCategories())
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteCategory(@PathVariable Long id) {
+        categoryService.deleteCategory(id);
+        return ApiResponse.<String>builder()
+                .result("Xóa danh mục thành công")
+                .build();
+    }
 
 }

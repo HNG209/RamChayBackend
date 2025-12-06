@@ -1,6 +1,7 @@
 {
   "permissions": [
     "ADD_CATEGORY",
+    "DELETE_CATEGORY",
     "ADD_PRODUCT",
     "EDIT_PRODUCT",
     "DELETE_PRODUCT",
@@ -17,6 +18,7 @@
   "roles": {
     "ROLE_MANAGER": [
       "ADD_CATEGORY",
+      "DELETE_CATEGORY",
       "ADD_PRODUCT",
       "EDIT_PRODUCT",
       "DELETE_PRODUCT",
@@ -29,6 +31,7 @@
     ],
     "ROLE_ADMIN": [
       "ADD_CATEGORY",
+      "DELETE_CATEGORY",
       "ADD_PRODUCT",
       "EDIT_PRODUCT",
       "DELETE_PRODUCT",
