@@ -20,6 +20,7 @@ public enum ErrorCode {
     PASSWORD_INVALID(3001, "invalid password", HttpStatus.UNAUTHORIZED),
     USERNAME_INVALID(3002, "invalid password", HttpStatus.BAD_REQUEST),
     KEY_INVALID(3003, "invalid enum key", HttpStatus.INTERNAL_SERVER_ERROR),
+    OWNERSHIP_INVALID(3004, "Ownership invalid", HttpStatus.BAD_REQUEST),
     BODY_NOT_SPECIFIED(3004, "body not specified", HttpStatus.BAD_REQUEST),
     SESSION_EXPIRED(3005, "Session expired", HttpStatus.UNAUTHORIZED),
     UNAUTHENTICATED(4004, "unauthenticated", HttpStatus.UNAUTHORIZED),

@@ -18,12 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @EntityGraph(attributePaths = {"roles", "roles.permissions"})
     Optional<User> findByUsername(String username);
     boolean existsByRoles_Name(String roleName);
-    boolean existsByRoles_Name(String roleName);
-
     @Query("SELECT u FROM User u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<User> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
-
     Optional<User> findById(Long id);
     Page<User> findAll(Pageable pageable);
     Page<User> findByFullNameContaining(

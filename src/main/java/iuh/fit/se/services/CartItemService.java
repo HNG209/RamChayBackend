@@ -1,6 +1,7 @@
 package iuh.fit.se.services;
 
 import iuh.fit.se.dtos.request.CartItemCreationRequest;
+import iuh.fit.se.dtos.request.CartItemUpdateRequest;
 import iuh.fit.se.dtos.response.CartItemCreationResponse;
 import iuh.fit.se.dtos.response.CartItemDeletionResponse;
 import iuh.fit.se.dtos.response.GetItemsResponse;
@@ -15,6 +16,8 @@ public interface CartItemService {
     CartItemDeletionResponse deleteCartItem(Long cartItemId, Long customerId);
 
     CartItem persistCartItem(CartItem cartItem);
+
+    GetItemsResponse updateCartItem(Long itemId, Long customerId, CartItemUpdateRequest request);
 
     Page<GetItemsResponse> getItemsByCartIdOrCustomerId(Long cartId, Long customerId, int page, int size);
 }
