@@ -22,7 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<User> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
     Optional<User> findById(Long id);
+
     Page<User> findAll(Pageable pageable);
+
     Page<User> findByFullNameContaining(
             String fullNamePattern,
             Pageable pageable

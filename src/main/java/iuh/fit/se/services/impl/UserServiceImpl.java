@@ -22,7 +22,9 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,16 +44,20 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public ManagerCreationResponse createManager(ManagerCreationRequest managerCreationRequest) {
 
-        Role role = roleRepository.findById(managerCreationRequest.getRoleId())
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-        System.out.println("ROLE ID = " + managerCreationRequest.getRoleId());
+        System.out.println("ROLE ID = " + managerCreationRequest.getRoles());
         String hashed = BCrypt.hashpw(managerCreationRequest.getPassword(), BCrypt.gensalt());
+        List<Long> roleIds = managerCreationRequest.getRoles().stream().toList();
+        Set<Role> roles = roleIds.stream()
+                .map(id -> roleRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + id)))
+                .collect(Collectors.toSet());
+
         User user = User.builder()
                 .username(managerCreationRequest.getUsername())
                 .password(hashed)
                 .fullName(managerCreationRequest.getFullName())
                 .active(managerCreationRequest.isActive())
-                .roles(Set.of(role))
+                .roles(roles)
                 .build();
 
         User userSaved = userRepository.save(user);
@@ -91,6 +97,12 @@ public class UserServiceImpl implements UserService {
             user.setPassword(hashed);
         }
 
+
+
+        if(request.getRoles() != null && !request.getRoles().isEmpty()){
+            user.setRoles(request.getRoles());
+        }
+
         userRepository.save(user);
 
         return managerMapper.toManagerUpdateResponse(user);
@@ -119,6 +131,7 @@ public class UserServiceImpl implements UserService {
                 .username(manager.getUsername())
                 .fullName(manager.getFullName())
                 .active(manager.isActive())
+                .roles(manager.getRoles())
                 .build();
     }
 

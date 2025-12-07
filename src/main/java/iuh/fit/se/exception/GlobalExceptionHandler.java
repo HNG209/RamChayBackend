@@ -53,6 +53,8 @@ public class GlobalExceptionHandler { // Xử lý lỗi tập trung
         return ResponseEntity
                 .status(code.getStatusCode())
                 .body(response);
+
+
     }
 
     @ExceptionHandler(value = RuntimeException.class)

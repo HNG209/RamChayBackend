@@ -8,6 +8,7 @@ import iuh.fit.se.dtos.request.ManagerUpdateRequest;
 import iuh.fit.se.dtos.response.*;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class ManagerController {
     private final UserService userService;
 
     @PostMapping
-    public ApiResponse<ManagerCreationResponse> createManager(@RequestBody ManagerCreationRequest request) {
+    public ApiResponse<ManagerCreationResponse> createManager(@Valid @RequestBody ManagerCreationRequest request) {
 
         return ApiResponse.<ManagerCreationResponse>builder()
                 .result(userService.createManager(request))
@@ -41,7 +42,7 @@ public class ManagerController {
 
     @PutMapping("/{id}")
     public ApiResponse<ManagerUpdateResponse> updateManager(
-            @PathVariable Long id,
+            @Valid @PathVariable Long id,
             @RequestBody ManagerUpdateRequest request) {
 
         return ApiResponse.<ManagerUpdateResponse>builder()

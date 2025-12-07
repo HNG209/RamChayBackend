@@ -1,10 +1,12 @@
 package iuh.fit.se.dtos.response;
 
 
+import iuh.fit.se.entities.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -17,4 +19,5 @@ public class ManagerFindResponse {
     String fullName;
     boolean active;
     LocalDateTime createdAt;
+    Set<Role> roles;
 }
