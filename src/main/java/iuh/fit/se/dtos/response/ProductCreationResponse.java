@@ -17,7 +17,7 @@ public class ProductCreationResponse {
     double price;
     int stock;
     String unit;
-    String imageUrl;
+    String indexImage;
     CategoryCreationResponse category;
     List<MediaUploadResponse> mediaList;
 }

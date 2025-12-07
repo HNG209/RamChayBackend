@@ -29,6 +29,9 @@ public class Product {
 
     String unit;
 
+    @Column(name = "image_url")
+    String indexImage;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     Category category;

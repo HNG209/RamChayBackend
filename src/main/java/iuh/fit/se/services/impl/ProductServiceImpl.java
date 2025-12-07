@@ -50,27 +50,38 @@ public class ProductServiceImpl implements ProductService {
                 .price(productCreationRequest.getPrice())
                 .stock(productCreationRequest.getStock())
                 .unit(productCreationRequest.getUnit())
+                .indexImage("")
                 .build();
 
         Product savedProduct = productRepository.save(product);
 
         Set<Media> mediaSet = new HashSet<>();
+        String firstImageUrl = null;
 
-        for (MultipartFile image : images) {
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile image = images.get(i);
             if (!image.isEmpty()) {
                 MediaUploadResponse mediaUploadResponse = cloudinaryService.upload(image);
+
+                if (firstImageUrl == null) {
+                    firstImageUrl = mediaUploadResponse.getSecureUrl();
+                }
 
                 Media mediaRequest = Media.builder()
                         .product(savedProduct)
                         .publicId(mediaUploadResponse.getPublicId())
                         .secureUrl(mediaUploadResponse.getSecureUrl())
                         .build();
-
                 mediaSet.add(mediaRequest);
             }
         }
 
         mediaRepository.saveAll(mediaSet);
+
+        if (firstImageUrl != null) {
+            savedProduct.setIndexImage(firstImageUrl); // <--- SỬA
+            savedProduct = productRepository.save(savedProduct);
+        }
 
         return productMapper.toProductCreationResponse(savedProduct);
     }
@@ -127,12 +138,20 @@ public class ProductServiceImpl implements ProductService {
         product.setStock(productCreationRequest.getStock());
         product.setUnit(productCreationRequest.getUnit());
 
-        Category currentCategory = product.getCategory();
-        if (currentCategory != null) {
-            currentCategory.setCategoryName(productCreationRequest.getCategory().getCategoryName());
-            currentCategory.setDescription(productCreationRequest.getCategory().getDescription());
-            categoryRepository.save(currentCategory);
+        String requestedIndex = productCreationRequest.getIndexImage();
+        if (requestedIndex != null && !requestedIndex.isEmpty()) {
+            boolean exists = product.getMediaFiles().stream()
+                    .anyMatch(media -> media.getSecureUrl().equals(requestedIndex));
+
+            if (exists) {
+                product.setIndexImage(requestedIndex);
+            }
         }
+
+        String categoryName = productCreationRequest.getCategory().getCategoryName();
+        Category category = categoryRepository.findByCategoryName(categoryName)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+        product.setCategory(category);
 
         List<Long> idsToDelete = productCreationRequest.getImageIdsToDelete();
         if (idsToDelete != null && !idsToDelete.isEmpty()) {
@@ -141,6 +160,11 @@ public class ProductServiceImpl implements ProductService {
                 if (media.getPublicId() != null) {
                     cloudinaryService.deleteImage(media.getPublicId());
                 }
+
+                if (media.getSecureUrl().equals(product.getIndexImage())) {
+                    product.setIndexImage("");
+                }
+
                 product.getMediaFiles().remove(media);
                 mediaRepository.delete(media);
             }
@@ -155,12 +179,21 @@ public class ProductServiceImpl implements ProductService {
                             .publicId(res.getPublicId())
                             .secureUrl(res.getSecureUrl())
                             .build();
-
                     product.getMediaFiles().add(newMedia);
+
+                    if (product.getIndexImage() == null || product.getIndexImage().isEmpty()) { // <--- SỬA
+                        product.setIndexImage(res.getSecureUrl()); // <--- SỬA
+                    }
                 }
             }
             // Lưu ý: Vì CascadeType.ALL, chỉ cần save Product là Media tự lưu
             // Nhưng nếu muốn chắc ăn, có thể save mediaRepository.saveAll(...)
+        }
+
+        // logic dự phòng
+        if ((product.getIndexImage() == null || product.getIndexImage().isEmpty()) && !product.getMediaFiles().isEmpty()) { // <--- SỬA
+            String fallbackUrl = product.getMediaFiles().iterator().next().getSecureUrl();
+            product.setIndexImage(fallbackUrl); // <--- SỬA
         }
 
         Product savedProduct = productRepository.save(product);

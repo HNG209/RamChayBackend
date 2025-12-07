@@ -16,26 +16,9 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface ProductMapper {
-
-    @Mapping(target = "imageUrl", source = "mediaFiles", qualifiedByName = "getMainImage")
+    @Mapping(target = "indexImage", source = "indexImage")
     @Mapping(target = "mediaList", source = "mediaFiles", qualifiedByName = "mapMediaList")
     ProductCreationResponse toProductCreationResponse(Product product);
-/*
-    Giải thích hàm: Frontend cần imageUrl (String), nhưng Entity lại có Set<Media>.
-    MapStruct cần được chỉ dẫn cách lấy ảnh đầu tiên trong Set làm ảnh đại diện.
- */
-    @Named("getMainImage")
-    default String getMainImage(Set<Media> mediaFiles) {
-        if (mediaFiles == null || mediaFiles.isEmpty()) {
-            return null;
-        }
-        // Lấy URL của ảnh đầu tiên tìm thấy
-        return mediaFiles.stream()
-                .sorted(Comparator.comparing(Media::getId))
-                .map(Media::getSecureUrl)
-                .findFirst()
-                .orElse(null);
-    }
 
     @Named("mapMediaList")
     default List<MediaUploadResponse> mapMediaList(Set<Media> mediaFiles) {
