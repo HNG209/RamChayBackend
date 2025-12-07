@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface AuthService {
     CustomerRegistrationResponse register(CustomerRegistrationRequest request);
     LoginResponse login(LoginRequest request, Long cartId) throws JOSEException;
+    LoginResponse adminLogin(LoginRequest request) throws JOSEException;
     SignedJWT verify(String token) throws JOSEException, ParseException;
     MyProfileResponse getMyProfile(Long id);
     LoginResponse refreshToken(String token) throws JOSEException, ParseException;

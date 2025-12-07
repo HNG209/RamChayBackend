@@ -17,12 +17,11 @@ public class MyProfileResponse {
     // Thông tin chung
     Long id;
     String username;
-//    String fullName; sẽ đổi thành displayName
+    String fullName;
     Set<String> roles;
     Set<String> permissions;
 
     // Thông tin riêng của Customer
-    String fullName;
     Set<String> phones;
     Set<Address> addresses;
 }

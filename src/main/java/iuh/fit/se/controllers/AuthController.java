@@ -11,6 +11,7 @@ import iuh.fit.se.entities.Customer;
 import iuh.fit.se.exception.AppException;
 import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.services.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -29,7 +30,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ApiResponse<CustomerRegistrationResponse> register(@RequestBody CustomerRegistrationRequest request) {
+    public ApiResponse<CustomerRegistrationResponse> register(@Valid @RequestBody CustomerRegistrationRequest request) {
         return ApiResponse.<CustomerRegistrationResponse>builder()
                 .result(authService.register(request))
                 .build();
@@ -71,6 +72,38 @@ public class AuthController {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCart.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
+                .body(ApiResponse.<LoginResponse>builder()
+                        .result(loginResponse)
+                        .build());
+    }
+
+    @PostMapping("/admin-login")
+    public ResponseEntity<?> adminLogin(
+            @RequestBody LoginRequest request) throws JOSEException {
+        LoginResponse loginResponse = authService.adminLogin(request);
+
+        String refreshToken = loginResponse.getRefreshToken();
+        String accessToken = loginResponse.getAccessToken();
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)  // Quan trọng: JS không đọc được
+                .secure(false)   // True nếu chạy https (Production), False nếu chạy localhost
+                .path("/")       // Cookie có hiệu lực toàn server
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax") // Hoặc "None" nếu khác domain, "Lax" nếu cùng domain/subdomain
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .body(ApiResponse.<LoginResponse>builder()

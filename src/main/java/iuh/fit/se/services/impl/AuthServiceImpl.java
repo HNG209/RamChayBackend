@@ -65,6 +65,9 @@ public class AuthServiceImpl implements AuthService {
     public CustomerRegistrationResponse register(CustomerRegistrationRequest request) {
         Customer customer = new Customer();
 
+        if(customerRepository.findByUsername(request.getUsername()).isPresent())
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
+
         Role role = roleService.findByName("ROLE_CUSTOMER");
 
         // hash mật khẩu
@@ -87,6 +90,11 @@ public class AuthServiceImpl implements AuthService {
 
         if (user == null)
             throw new AppException(ErrorCode.CUSTOMER_NOT_FOUND);
+
+        user.getRoles().forEach(role -> {
+            if(!role.getName().contains("ROLE_CUSTOMER"))
+                throw new AppException(ErrorCode.CUSTOMER_ONLY);
+        });
 
         if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.PASSWORD_INVALID);
@@ -112,6 +120,32 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(refreshToken)
                 .accessToken(accessToken)
                 .message("Đăng nhập thành công")
+                .build();
+    }
+
+    @Override
+    public LoginResponse adminLogin(LoginRequest request) throws JOSEException {
+        User user = userService.findByUsername(request.getUsername());
+
+        if (user == null)
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+
+        user.getRoles().forEach(role -> {
+            if(role.getName().contains("ROLE_CUSTOMER"))
+                throw new AppException(ErrorCode.CUSTOMER_NOT_ALLOWED);
+        });
+
+        if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_INVALID);
+        }
+
+        String refreshToken = generateToken(user, 7, ChronoUnit.DAYS);
+        String accessToken = generateToken(user, 1, ChronoUnit.HOURS);
+
+        return LoginResponse.builder()
+                .refreshToken(refreshToken)
+                .accessToken(accessToken)
+                .message("Đăng nhập thành công vào tài khoản quản trị")
                 .build();
     }
 
@@ -209,6 +243,7 @@ public class AuthServiceImpl implements AuthService {
         MyProfileResponse response = MyProfileResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .fullName(user.getFullName())
                 .roles(user.getRoles().stream()
                         .map(Role::getName)
                         .collect(Collectors.toSet()))
@@ -216,7 +251,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         if (user instanceof Customer customer) {
-            response.setFullName(customer.getFullName());
+            response.setPhones(customer.getPhones());
             response.setAddresses(customer.getAddresses());
         }
 

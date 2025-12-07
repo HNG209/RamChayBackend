@@ -9,6 +9,7 @@ import iuh.fit.se.dtos.response.CartItemDeletionResponse;
 import iuh.fit.se.dtos.response.GetItemsResponse;
 import iuh.fit.se.entities.CartItem;
 import iuh.fit.se.services.CartItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -71,7 +72,7 @@ public class CartItemController {
     public ApiResponse<GetItemsResponse> updateCartItem(
             @PathVariable("id") Long cartItemId,
             @AuthenticationPrincipal Jwt jwt,
-            @RequestBody CartItemUpdateRequest request) {
+            @Valid @RequestBody CartItemUpdateRequest request) {
         Long userId = null;
 
         if (jwt != null)

@@ -7,6 +7,7 @@ import iuh.fit.se.repositories.RoleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@Order(1)
 public class RbacInitializer implements CommandLineRunner {
 
     private final PermissionRepository permissionRepository;

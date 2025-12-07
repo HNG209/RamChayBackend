@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {// repository của sub class
-
+    Optional<Customer> findByUsername(String username);
     Optional<Customer> getCustomerById(Long id);
 
 }
