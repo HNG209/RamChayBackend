@@ -7,6 +7,7 @@ import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.CustomerRegistrationResponse;
 import iuh.fit.se.services.AuthService;
 import iuh.fit.se.services.CartService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -23,8 +24,8 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<AddCartItemResponse>> register(
-            @RequestBody CartItemCreationRequest request,
+    public ResponseEntity<ApiResponse<AddCartItemResponse>> addItem(
+            @Valid @RequestBody CartItemCreationRequest request,
             @AuthenticationPrincipal Jwt jwt,
             @CookieValue(name = "cart", required = false) String cartId) {
         Long userId = null;
