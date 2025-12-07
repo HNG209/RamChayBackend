@@ -18,10 +18,6 @@ import java.util.Set;
 @Table(name = "customers")
 @PrimaryKeyJoinColumn(name = "customer_id")
 public class Customer extends User {
-
-    @Column(name = "full_name")
-    String fullName;
-
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "phones", joinColumns = @JoinColumn(name = "customer_id"))
     @Column(name = "number", nullable = false)

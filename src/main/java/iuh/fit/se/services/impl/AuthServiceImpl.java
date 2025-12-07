@@ -243,6 +243,7 @@ public class AuthServiceImpl implements AuthService {
         MyProfileResponse response = MyProfileResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .fullName(user.getFullName())
                 .roles(user.getRoles().stream()
                         .map(Role::getName)
                         .collect(Collectors.toSet()))
@@ -250,7 +251,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         if (user instanceof Customer customer) {
-            response.setFullName(customer.getFullName());
+            response.setPhones(customer.getPhones());
             response.setAddresses(customer.getAddresses());
         }
 
