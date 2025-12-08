@@ -38,8 +38,8 @@ public class RoleController {
 
     @PutMapping("/{id}")
     public ApiResponse<RoleCreationResponse> updateRole(
-            @Valid  @PathVariable Long id,
-            @RequestBody RoleCreationRequest request){
+            @PathVariable Long id,
+            @Valid  @RequestBody RoleCreationRequest request){
 
         return ApiResponse.<RoleCreationResponse>builder()
                 .result(roleServiceImpl.updateRole(id,request))
