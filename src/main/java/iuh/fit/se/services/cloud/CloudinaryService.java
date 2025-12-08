@@ -14,24 +14,24 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CloudinaryService {
 
-    private final Cloudinary cloudinary;
-
-    public MediaUploadResponse upload(MultipartFile file) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap("resource_type", "image")
-        );
-
-        return MediaUploadResponse.builder()
-                .publicId(uploadResult.get("public_id").toString())
-                .secureUrl(uploadResult.get("secure_url").toString())
-                .build();
-
-    }
-
-    public void deleteImage(String publicId) throws IOException {
-        if (publicId != null && !publicId.isEmpty()) {
-            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-        }
-    }
+//    private final Cloudinary cloudinary;
+//
+//    public MediaUploadResponse upload(MultipartFile file) throws IOException {
+//        Map uploadResult = cloudinary.uploader().upload(
+//                file.getBytes(),
+//                ObjectUtils.asMap("resource_type", "image")
+//        );
+//
+//        return MediaUploadResponse.builder()
+//                .publicId(uploadResult.get("public_id").toString())
+//                .secureUrl(uploadResult.get("secure_url").toString())
+//                .build();
+//
+//    }
+//
+//    public void deleteImage(String publicId) throws IOException {
+//        if (publicId != null && !publicId.isEmpty()) {
+//            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+//        }
+//    }
 }

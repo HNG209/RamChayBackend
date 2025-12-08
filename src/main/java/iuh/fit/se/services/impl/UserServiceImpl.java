@@ -97,8 +97,6 @@ public class UserServiceImpl implements UserService {
             user.setPassword(hashed);
         }
 
-
-
         if(request.getRoles() != null && !request.getRoles().isEmpty()){
             user.setRoles(request.getRoles());
         }

@@ -42,8 +42,8 @@ public class ManagerController {
 
     @PutMapping("/{id}")
     public ApiResponse<ManagerUpdateResponse> updateManager(
-            @Valid @PathVariable Long id,
-            @RequestBody ManagerUpdateRequest request) {
+            @PathVariable Long id,
+            @Valid @RequestBody ManagerUpdateRequest request) {
 
         return ApiResponse.<ManagerUpdateResponse>builder()
                 .result(userService.updateManager(id, request))

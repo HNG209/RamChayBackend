@@ -30,7 +30,7 @@ public enum ErrorCode {
     UNAUTHENTICATED(4004, "[4004] Unauthenticated", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_MISSING(4005, "[4005] Refresh token missing", HttpStatus.BAD_REQUEST),
     UNAUTHORIZED(4003, "[4003] Access denied", HttpStatus.FORBIDDEN),
-//    INVALID_DOB(3003, "[3003] Invalid date of birth", HttpStatus.BAD_REQUEST),
+    //    INVALID_DOB(3003, "[3003] Invalid date of birth", HttpStatus.BAD_REQUEST),
     CUSTOMER_NOT_FOUND(4001, "[4001] Customer not found", HttpStatus.NOT_FOUND),
     PRODUCT_NOT_FOUND(4002, "[4002] Product not found", HttpStatus.NOT_FOUND),
     CART_ITEM_NOT_FOUND(4003, "[4003] Cart item not found", HttpStatus.NOT_FOUND),
@@ -40,6 +40,23 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(4007, "[4007] Product out of stock", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(4008, "[4008] Order not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(4009, "[4009] Invalid quantity", HttpStatus.BAD_REQUEST),
+
+    MANAGER_USERNAME_SIZE_INVALID(40010, "[40011] Username must be at least 6 characters long", HttpStatus.BAD_REQUEST),
+    MANAGER_USERNAME_INVALID(40020, "[40020] Username must not be null ", HttpStatus.BAD_REQUEST ),
+    MANAGER_FULLNAME_SIZE_INVALID(40010, "[40012] Full name must be at least 6 characters long", HttpStatus.BAD_REQUEST),
+    MANAGER_FULLNAME_INVALID(40021, "[40021] Full name must be not null", HttpStatus.BAD_REQUEST),
+    ROLE_SIZE_INVALID(40011, "[40011] At least one role is required", HttpStatus.BAD_REQUEST),
+    ROLE_INVALID(40012, "[40012] Roles cannot be null", HttpStatus.BAD_REQUEST),
+    ROLE_NAME_INVALID(40013, "[40013] Role name must follow the format ROLE_ followed by uppercase letters", HttpStatus.BAD_REQUEST),
+    ROLE_NAME_SIZE_INVALID(40014, "[40014] Role name cannot be null", HttpStatus.BAD_REQUEST),
+
+    PERMISSION_SIZE_INVALID(40015, "[40015] Permission list must contain at least one permission", HttpStatus.BAD_REQUEST),
+    PERMISSION_INVALID(40016, "[40016] Permission list cannot be null", HttpStatus.BAD_REQUEST),
+    ROLE_DESCRIPTION_SIZE_INVALID(40017, "[40017] Description must be at least 10 characters long", HttpStatus.BAD_REQUEST),
+    ROLE_DESCRIPTION_INVALID(40018, "[40018] Description cannot be null", HttpStatus.BAD_REQUEST),
+    PERMISSION_NAME_INVALID(40019, "[40019] Role name must not be null", HttpStatus.BAD_REQUEST),
+    PERMISSION_NAME_SIZE_INVALID(40019, "[40019] Role name must contain only uppercase letters and underscores (e.g., ADD_VIEW)", HttpStatus.BAD_REQUEST),
+
     ;
 
 

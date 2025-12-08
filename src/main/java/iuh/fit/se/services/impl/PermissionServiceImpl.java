@@ -34,8 +34,8 @@ public class PermissionServiceImpl implements PermissionService {
     public PermissionCreationResponse createPermission(PermissionCreationRequest permissionCreationRequest) {
         Optional<Permission> permissionOptional = permissionRepository.findByName(permissionCreationRequest.getName());
 
-        if (permissionOptional.isPresent())
-            throw new AppException(ErrorCode.PERMISSION_EXISTED);
+//        if (permissionOptional.isPresent())
+//            throw new AppException(ErrorCode.PERMISSION_EXISTED);
 
         Permission newPermission = new Permission();
         newPermission.setName(permissionCreationRequest.getName());
