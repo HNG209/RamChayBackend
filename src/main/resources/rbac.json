@@ -1,28 +1,39 @@
 {
   "permissions": [
+    "VIEW_DASHBOARD",
+
+    "VIEW_CATEGORIES",
+    "UPDATE_CATEGORY",
     "ADD_CATEGORY",
     "DELETE_CATEGORY",
+
+    "VIEW_PRODUCTS",
     "ADD_PRODUCT",
     "EDIT_PRODUCT",
     "DELETE_PRODUCT",
+
     "VIEW_ORDER",
-    "MANAGE_CUSTOMER",
     "CREATE_ORDER",
+
+    "VIEW_MANAGERS",
     "ADD_MANAGER",
     "DELETE_MANAGER",
     "UPDATE_MANAGER",
     "SEARCH_MANAGER",
     "FIND_MANAGER",
     "PAGE_MANAGER",
-    "GET_ROLE",
-    "GETALL_ROLE",
-    "GETALL_PERMISSION",
+
+    "MANAGE_CUSTOMER",
+
+    "VIEW_ROLES",
     "CREATE_ROLE",
     "UPDATE_ROLE",
-    "FINDONE_ROLE",
     "DELETE_ROLE",
-    "PAGE_ROLE",
-    "CREATE_PERMISSION"
+
+    "VIEW_PERMISSIONS",
+    "UPDATE_PERMISSION",
+    "CREATE_PERMISSION",
+    "DELETE_PERMISSION"
   ],
   "roles": {
     "ROLE_MANAGER": [
@@ -39,28 +50,22 @@
       "ADD_PRODUCT"
     ],
     "ROLE_ADMIN": [
-      "ADD_CATEGORY",
-      "DELETE_CATEGORY",
-      "ADD_PRODUCT",
-      "EDIT_PRODUCT",
-      "DELETE_PRODUCT",
-      "VIEW_ORDER",
-      "MANAGE_CUSTOMER",
+      "VIEW_MANAGERS",
       "ADD_MANAGER",
       "DELETE_MANAGER",
       "UPDATE_MANAGER",
       "SEARCH_MANAGER",
       "FIND_MANAGER",
       "PAGE_MANAGER",
-      "GETALL_PERMISSION",
-      "CREATE_PERMISSION",
-      "GET_ROLE",
-      "GETALL_ROLE",
+
+      "VIEW_ROLES",
       "CREATE_ROLE",
       "UPDATE_ROLE",
-      "FINDONE_ROLE",
       "DELETE_ROLE",
-      "PAGE_ROLE"
+
+      "VIEW_PERMISSIONS",
+      "CREATE_PERMISSION",
+      "DELETE_PERMISSION"
     ]
   }
 }

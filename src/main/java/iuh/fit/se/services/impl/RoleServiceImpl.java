@@ -85,7 +85,7 @@ public class RoleServiceImpl implements RoleService {
         return roleMapper.toRoleCreationResponse(role);
     }
 
-    @PreAuthorize("hasAuthority('FINDONE_ROLE')")
+    @PreAuthorize("hasAuthority('VIEW_ROLES')")
     @Override
     public RoleFindResponse getRoleById(Long roleId) {
 //        tim role
@@ -117,7 +117,7 @@ public class RoleServiceImpl implements RoleService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('PAGE_ROLE')")
+    @PreAuthorize("hasAuthority('VIEW_ROLES')")
     @Override
     public RolePaginationResponse getRoles(int page, int pageSize, String keyWord) {
         // Tạo đối tượng Pageable (sử dụng 0-based index)
@@ -155,12 +155,12 @@ public class RoleServiceImpl implements RoleService {
     }
 
 
-    @PreAuthorize("hasAuthority('GET_ROLE')")
+    @PreAuthorize("hasAuthority('VIEW_ROLES')")
     public List<Role> getRoles() {
         return roleRepository.findAllExceptCustomer();
     }
 
-    @PreAuthorize("hasAuthority('GETALL_ROLE')")
+    @PreAuthorize("hasAuthority('VIEW_ROLES')")
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }

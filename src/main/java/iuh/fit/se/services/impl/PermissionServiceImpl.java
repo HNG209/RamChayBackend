@@ -23,7 +23,7 @@ public class PermissionServiceImpl implements PermissionService {
     private final PermissionRepository permissionRepository;
     private final PermissionMapper permissionMapper;
 
-    @PreAuthorize("hasAuthority('GETALL_PERMISSION')")
+    @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
     public List<Permission> getAllPermissions() {
         return permissionRepository.findAll();
     }
