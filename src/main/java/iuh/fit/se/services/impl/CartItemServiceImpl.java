@@ -85,7 +85,7 @@ public class CartItemServiceImpl implements CartItemService {
 
         // Nếu item đã có trong giỏ hàng của 1 user thì không được phép xoá (Integrity)
         // Nếu là khách vãng lai (ownerId = null) thì xoá là hợp lệ cho bất kì người nào
-        if(ownerId != null && !ownerId.equals(customerId))
+        if (ownerId != null && !ownerId.equals(customerId))
             throw new AppException(ErrorCode.OWNERSHIP_INVALID);
 
         cartItemRepository.deleteById(cartItem.getId());
@@ -127,7 +127,7 @@ public class CartItemServiceImpl implements CartItemService {
 
         // Nếu item đã có trong giỏ hàng của 1 user thì không được phép sửa (Integrity)
         // Nếu là khách vãng lai (ownerId = null) thì sửa là hợp lệ cho bất kì người nào
-        if(ownerId != null && !ownerId.equals(customerId))
+        if (ownerId != null && !ownerId.equals(customerId))
             throw new AppException(ErrorCode.OWNERSHIP_INVALID);
 
         item.setQuantity(request.getQuantity());
@@ -156,20 +156,24 @@ public class CartItemServiceImpl implements CartItemService {
                             .id(cartItem.getId())
                             .productId(cartItem.getProduct().getId())
                             .productName(cartItem.getProduct().getName())
-//                            .subtotal(cartItem.getSubtotal())
+                            .indexImage(cartItem.getProduct().getIndexImage())
                             .unitPrice(cartItem.getProduct().getPrice())
                             .quantity(cartItem.getQuantity())
                             .build())).orElseGet(Page::empty);
         }
 
         if (cartId != null) {
+            Optional<Cart> cart = cartRepository.findById(cartId);
+            if (cart.isPresent() && cart.get().getCustomer() != null)
+                throw new AppException(ErrorCode.OWNERSHIP_INVALID);
+
             // Nếu có cart id trong cookie thì trả về
             return cartItemRepository.findAllByCart_Id(cartId, pageable)
                     .map(cartItem -> GetItemsResponse.builder()
                             .id(cartItem.getId())
                             .productId(cartItem.getProduct().getId())
                             .productName(cartItem.getProduct().getName())
-//                            .subtotal(cartItem.getSubtotal())
+                            .indexImage(cartItem.getProduct().getIndexImage())
                             .unitPrice(cartItem.getProduct().getPrice())
                             .quantity(cartItem.getQuantity())
                             .build());

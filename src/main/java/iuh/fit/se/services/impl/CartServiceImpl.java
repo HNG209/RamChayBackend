@@ -6,6 +6,8 @@ import iuh.fit.se.entities.Cart;
 import iuh.fit.se.entities.CartItem;
 import iuh.fit.se.entities.Customer;
 import iuh.fit.se.entities.Product;
+import iuh.fit.se.exception.AppException;
+import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.repositories.CartItemRepository;
 import iuh.fit.se.repositories.CartRepository;
 import iuh.fit.se.services.CartItemService;
@@ -29,13 +31,13 @@ public class CartServiceImpl implements CartService {
     public AddCartItemResponse addItem(CartItemCreationRequest request, Long userId, Long cartId) {
         // quan trọng nhất, có 2 luồng cho khách hàng đã đăng nhập và khách vãng lai (4 nhánh điều kiện)
         if (userId == null) { // nếu người dùng không đăng nhập
-            Optional<Cart> existingAnonymousCart =
+            Optional<Cart> existingCart =
                     cartId == null
                             ? Optional.empty()
                             : cartRepository.findById(cartId);
 
             // Chưa đăng nhập và cookies chứa giỏ hàng chưa tồn tại
-            if (existingAnonymousCart.isEmpty()) {
+            if (existingCart.isEmpty()) {
                 Cart newCart = new Cart();
                 newCart.setCustomer(null);
 
@@ -55,9 +57,13 @@ public class CartServiceImpl implements CartService {
                         .build();
             }
 
+            // Kiểm tra giỏ hàng đó có phải của người khác hay không (Integrity check)
+            if (existingCart.get().getCustomer() != null)
+                throw new AppException(ErrorCode.OWNERSHIP_INVALID);
+
             // Chưa đăng nhập nhưng còn GIỮ cookies giỏ hàng
             CartItem item = CartItem.builder()
-                    .cart(existingAnonymousCart.get())
+                    .cart(existingCart.get())
 //                    .unitPrice(request.getUnitPrice())
                     .product(Product.builder().id(request.getProductId()).build())
                     .quantity(request.getQuantity())
@@ -67,7 +73,7 @@ public class CartServiceImpl implements CartService {
             cartItemService.persistCartItem(item); // sửa hoặc tạo nếu chưa có
 
             return AddCartItemResponse.builder()
-                    .cartId(existingAnonymousCart.get().getId())
+                    .cartId(existingCart.get().getId())
                     .build();
         }
 
