@@ -40,7 +40,7 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(4007, "[4007] Product out of stock", HttpStatus.BAD_REQUEST),
     ORDER_NOT_FOUND(4008, "[4008] Order not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(4009, "[4009] Invalid quantity", HttpStatus.BAD_REQUEST),
-    PERMISSION_EXISTED(4010, "[4010] Permission existed", HttpStatus.BAD_REQUEST);
+    PERMISSION_EXISTED(4010, "[4010] Permission existed", HttpStatus.BAD_REQUEST),
 
     MANAGER_USERNAME_SIZE_INVALID(40010, "[40011] Username must be at least 6 characters long", HttpStatus.BAD_REQUEST),
     MANAGER_USERNAME_INVALID(40020, "[40020] Username must not be null ", HttpStatus.BAD_REQUEST ),

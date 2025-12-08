@@ -46,7 +46,7 @@ public class PermissionServiceImpl implements PermissionService {
         Permission savedPermission = permissionRepository.save(newPermission);
         return permissionMapper.toPermissionCreationResponse(savedPermission);
     }
-    @PreAuthorize("hasAuthority('PAGE_PERMISSION')")
+    @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
     @Override
     public PermissionPaginationResponse getPermission(int page, int pageSize, String keyWord) {
         Pageable pageable = PageRequest.of(page, pageSize);
