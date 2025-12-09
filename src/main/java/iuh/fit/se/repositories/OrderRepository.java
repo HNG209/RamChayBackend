@@ -17,4 +17,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     //Optional hạn chế vấn đề NullPointerException, bên service dùng isPresent() hoặc orElseThrow() để kiểm tra.
     @Query("SELECT o FROM Order o WHERE o.id = :orderId AND o.customer.id = :customerId")
     Optional<Order> findByIdAndCustomerId(@Param("orderId") Long orderId, @Param("customerId") Long customerId);
+
+    @Query("SELECT o FROM Order o WHERE o.id = :orderId AND o.email = :email AND o.customer IS NULL")
+    Optional<Order> findByIdAndEmailForGuest(@Param("orderId") Long orderId, @Param("email") String email);
 }

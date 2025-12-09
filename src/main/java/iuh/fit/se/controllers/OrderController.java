@@ -74,4 +74,21 @@ public class OrderController {
                 .build();
     }
 
+    /**
+     * Lấy chi tiết đơn hàng cho khách vãng lai bằng orderId và email.
+     * Endpoint này không yêu cầu authentication.
+     * @param orderId
+     * @param email
+     * @return
+     * @author Duc
+     * @date 12/09/2024
+     */
+    @GetMapping("/{orderId}/guest")
+    public ApiResponse<OrderCreationResponse> getGuestOrderById(@PathVariable Long orderId,
+                                                                @RequestParam String email) {
+        return ApiResponse.<OrderCreationResponse>builder()
+                .result(orderService.getGuestOrderById(orderId, email))
+                .build();
+    }
+
 }
