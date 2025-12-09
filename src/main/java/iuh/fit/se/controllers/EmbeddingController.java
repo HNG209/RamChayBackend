@@ -1,7 +1,9 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.ProductEmbeddingRequest;
+import iuh.fit.se.dtos.response.RagResponse;
 import iuh.fit.se.services.springai.EmbeddingService;
+import iuh.fit.se.services.springai.RagService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,6 @@ public class EmbeddingController {
 //        embeddingService.embedImage(file);
 //        return "2048";
 //    }
-
     @GetMapping("/search")
     public List<Document> search(@RequestParam String q) {
         return embeddingService.search(q);
