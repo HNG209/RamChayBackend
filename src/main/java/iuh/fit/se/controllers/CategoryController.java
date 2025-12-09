@@ -4,6 +4,7 @@ import iuh.fit.se.dtos.request.CategoryCreationRequest;
 import iuh.fit.se.dtos.request.RoleDeleteRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.CategoryCreationResponse;
+import iuh.fit.se.dtos.response.PageResponse;
 import iuh.fit.se.dtos.response.RoleDeleteResponse;
 import iuh.fit.se.services.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,15 @@ public class CategoryController {
                 .build();
     }
 
-
+    @GetMapping("/page")
+    public ApiResponse<PageResponse<CategoryCreationResponse>> getCategoriesPage(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "") String keyword
+    ) {
+        return ApiResponse.<PageResponse<CategoryCreationResponse>>builder()
+                .result(categoryService.getCategoriesWithPagination(page, size, keyword))
+                .build();
+    }
 
 }

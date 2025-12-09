@@ -1,8 +1,6 @@
 package iuh.fit.se.dtos.response;
 
 import iuh.fit.se.entities.Address;
-import iuh.fit.se.entities.Permission;
-import iuh.fit.se.entities.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,6 +15,7 @@ public class MyProfileResponse {
     // Thông tin chung
     Long id;
     String username;
+    String email; // Email của user (có thể giống username hoặc riêng biệt)
     String fullName;
     Set<String> roles;
     Set<String> permissions;

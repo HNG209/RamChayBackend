@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác nhận đơn hàng</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #4CAF50;
+            margin: 0;
+            font-size: 28px;
+        }
+        .order-info {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+        }
+        .order-info h2 {
+            color: #4CAF50;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+        .info-value {
+            color: #333;
+            text-align: right;
+        }
+        .order-items {
+            margin: 25px 0;
+        }
+        .order-items h2 {
+            color: #4CAF50;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .total-row {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .total-row td {
+            padding: 15px 12px;
+            color: #4CAF50;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+        .highlight {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            background-color: #FFA726;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 RamChay Store</h1>
+            <p style="margin: 10px 0 0 0; color: #666;">Cảm ơn bạn đã đặt hàng!</p>
+        </div>
+
+        <p>Xin chào <strong th:text="${receiverName}">Khách hàng</strong>,</p>
+        <p>Chúng tôi đã nhận được đơn hàng của bạn và đang xử lý. Dưới đây là thông tin chi tiết:</p>
+
+        <div class="order-info">
+            <h2>📋 Thông tin đơn hàng</h2>
+            <div class="info-row">
+                <span class="info-label">Mã đơn hàng:</span>
+                <span class="info-value highlight" th:text="'#' + ${orderId}">#12345</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Ngày đặt hàng:</span>
+                <span class="info-value" th:text="${orderDate}">01/12/2024 10:30</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Trạng thái:</span>
+                <span class="info-value">
+                    <span class="status-badge" th:text="${orderStatus}">Chờ thanh toán</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="order-info">
+            <h2>🚚 Thông tin giao hàng</h2>
+            <div class="info-row">
+                <span class="info-label">Người nhận:</span>
+                <span class="info-value" th:text="${receiverName}">Nguyễn Văn A</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Số điện thoại:</span>
+                <span class="info-value" th:text="${receiverPhone}">0123456789</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Địa chỉ:</span>
+                <span class="info-value" th:text="${shippingAddress}">123 Đường ABC, Quận 1, TP.HCM</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Phương thức thanh toán:</span>
+                <span class="info-value" th:text="${paymentMethod}">Thanh toán khi nhận hàng</span>
+            </div>
+        </div>
+
+        <div class="order-items">
+            <h2>🛒 Chi tiết đơn hàng</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th style="text-align: center;">SL</th>
+                        <th style="text-align: right;">Đơn giá</th>
+                        <th style="text-align: right;">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${orderItems}">
+                        <td th:text="${item.productName}">Sản phẩm A</td>
+                        <td style="text-align: center;" th:text="${item.quantity}">1</td>
+                        <td style="text-align: right;" th:text="${item.unitPrice}">100,000₫</td>
+                        <td style="text-align: right;" th:text="${item.subtotal}">100,000₫</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td colspan="3" style="text-align: right;">Tổng cộng:</td>
+                        <td style="text-align: right;" th:text="${total}">300,000₫</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="background-color: #E8F5E9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+            <p style="margin: 0; color: #2E7D32;">
+                <strong>💡 Lưu ý:</strong> Bạn có thể theo dõi trạng thái đơn hàng bằng cách đăng nhập vào tài khoản của mình trên website.
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi:</p>
+            <p><strong>Email:</strong> support@ramchay.com | <strong>Hotline:</strong> 1900-xxxx</p>
+            <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                © 2024 RamChay Store. All rights reserved.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -27,4 +27,6 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
             String fullNamePattern,
             Pageable pageable
     );
+
+    boolean existsByPermissions_Id(Long permissionId);
 }

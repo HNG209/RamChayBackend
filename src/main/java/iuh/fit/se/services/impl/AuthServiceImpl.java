@@ -74,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
         String hashed = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
         customer.setUsername(request.getUsername());
         customer.setPassword(hashed);
+        customer.setEmail(request.getEmail()); // Set email if provided
         customer.setFullName(request.getFullName());
         customer.setPhones(Set.of(request.getPhone()));
 
@@ -243,6 +244,7 @@ public class AuthServiceImpl implements AuthService {
         MyProfileResponse response = MyProfileResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .email(user.getEmail()) // Use actual email field from User entity
                 .fullName(user.getFullName())
                 .roles(user.getRoles().stream()
                         .map(Role::getName)

@@ -67,6 +67,10 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
+        if ("ROLE_ADMIN".equalsIgnoreCase(role.getName())) {
+            throw new AppException(ErrorCode.ROLE_ADMIN_NOTUPDATE);
+        }
+
         Set<Permission> permissions = dto.getPermissionIds().stream()
                 .map(id -> permissionRepository.findById(id)
                         .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND))).collect(Collectors.toSet());

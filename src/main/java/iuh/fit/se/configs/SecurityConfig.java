@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth // [Giai đoạn 3]: cho phép đi qua nếu là public
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/orders/*/guest").permitAll() // Cho phép khách vãng lai xem đơn hàng
                         .requestMatchers(
                                 "/managers/**",
                                 "/auth/login",

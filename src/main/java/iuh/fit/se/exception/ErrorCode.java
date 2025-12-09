@@ -41,15 +41,18 @@ public enum ErrorCode {
     ORDER_NOT_FOUND(4008, "[4008] Order not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(4009, "[4009] Invalid quantity", HttpStatus.BAD_REQUEST),
     PERMISSION_EXISTED(4010, "[4010] Permission existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_FOUND(4011, "[4011] Category not found", HttpStatus.NOT_FOUND),
+    ADDRESS_NOT_FOUND(4012, "[4011] Address not found", HttpStatus.NOT_FOUND),
 
     MANAGER_USERNAME_SIZE_INVALID(40010, "[40011] Username must be at least 6 characters long", HttpStatus.BAD_REQUEST),
-    MANAGER_USERNAME_INVALID(40020, "[40020] Username must not be null ", HttpStatus.BAD_REQUEST ),
+    MANAGER_USERNAME_INVALID(40020, "[40020] Username must not be null ", HttpStatus.BAD_REQUEST),
     MANAGER_FULLNAME_SIZE_INVALID(40010, "[40012] Full name must be at least 6 characters long", HttpStatus.BAD_REQUEST),
     MANAGER_FULLNAME_INVALID(40021, "[40021] Full name must be not null", HttpStatus.BAD_REQUEST),
     ROLE_SIZE_INVALID(40011, "[40011] At least one role is required", HttpStatus.BAD_REQUEST),
     ROLE_INVALID(40012, "[40012] Roles cannot be null", HttpStatus.BAD_REQUEST),
     ROLE_NAME_INVALID(40013, "[40013] Role name must follow the format ROLE_ followed by uppercase letters", HttpStatus.BAD_REQUEST),
     ROLE_NAME_SIZE_INVALID(40014, "[40014] Role name cannot be null", HttpStatus.BAD_REQUEST),
+    ROLE_ADMIN_NOTUPDATE(40020, "[40020] Role Admin can not update", HttpStatus.BAD_REQUEST),
 
     PERMISSION_SIZE_INVALID(40015, "[40015] Permission list must contain at least one permission", HttpStatus.BAD_REQUEST),
     PERMISSION_INVALID(40016, "[40016] Permission list cannot be null", HttpStatus.BAD_REQUEST),
@@ -57,7 +60,19 @@ public enum ErrorCode {
     ROLE_DESCRIPTION_INVALID(40018, "[40018] Description cannot be null", HttpStatus.BAD_REQUEST),
     PERMISSION_NAME_INVALID(40019, "[40019] Role name must not be null", HttpStatus.BAD_REQUEST),
     PERMISSION_NAME_SIZE_INVALID(40019, "[40019] Role name must contain only uppercase letters and underscores (e.g., ADD_VIEW)", HttpStatus.BAD_REQUEST),
+    PERMISSION_IN_USE(40021, "[40021]Cannot delete Permission because it is currently assigned to a Role", HttpStatus.BAD_REQUEST),
 
+
+    PRODUCT_NAME_INVALID(5001, "[5001] Product name must be at least 3 characters long", HttpStatus.BAD_REQUEST),
+    PRODUCT_CATEGORY_INVALID(5002, "[5002] Product's category must be null or empty", HttpStatus.BAD_REQUEST),
+    PRODUCT_PRICE_MISSING(5003, "[5003] Product's price cannot be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_PRICE_INVALID(5004, "[5004] Product's price must be a positive number", HttpStatus.BAD_REQUEST),
+    PRODUCT_UNIT_INVALID(5005, "[5005] Product's unit cannot be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_STOCK_MISSING(5006, "[5006] Product's stock cannot be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_STOCK_INVALID(5007, "[5007] Product's stock must be a positive number ", HttpStatus.BAD_REQUEST),
+    PRODUCT_MEDIA_INVALID(5008, "[5008] Product's media should contain atleast 1 image", HttpStatus.BAD_REQUEST),
+    CATEGORY_PRODUCT_EXIST(5009, "[5009] Category is still existing in some products", HttpStatus.BAD_REQUEST),
+    CATEGORY_NAME_INVALID(5010, "[5010] Category name cannot be null", HttpStatus.BAD_REQUEST),
     ;
 
 

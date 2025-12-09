@@ -47,6 +47,9 @@ public class Order {
     @Column(name = "shipping_address")
     String shippingAddress;
 
+    @Column(name = "email")
+    String email; // Email để gửi xác nhận đơn hàng (cho cả khách đăng nhập và khách vãng lai)
+
     // Một khách hàng có thể có nhiều đơn hàng
     // Cho phép customer null để xử lý trường hợp khách vãng lai
     @ManyToOne

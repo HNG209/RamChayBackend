@@ -29,6 +29,9 @@ public class User { // Super class: lớp cha
     @Column(nullable = false)
     String password;
 
+    @Column(name = "email", nullable = false)
+    String email; // Email của user (bắt buộc, độc lập với username)
+
     @Column(name = "is_active", nullable = false)
     private boolean active = true;   // default true
 
