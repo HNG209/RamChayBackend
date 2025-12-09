@@ -28,8 +28,10 @@ public class OrderCreationRequest {
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Phone must be 10-11 digits")
     String receiverPhone;
 
-    @NotBlank(message = "Shipping address is required")
-    String shippingAddress;
+    // Địa chỉ giao hàng: có thể là addressId (chọn từ saved) hoặc shippingAddress (nhập mới)
+    Long addressId; // ID của địa chỉ đã lưu (optional)
+
+    String shippingAddress; // Địa chỉ dạng string (optional, dùng khi không chọn addressId)
 
     @NotNull(message = "Payment method is required")
     PaymentMethod paymentMethod;

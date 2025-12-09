@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,7 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
     private final CartItemRepository cartItemRepository;
     private final iuh.fit.se.repositories.CustomerRepository customerRepository;
     private final iuh.fit.se.services.EmailService emailService;
+    private final iuh.fit.se.repositories.AddressRepository addressRepository;
 
     /**
      * Tạo đơn hàng mới từ các items được chọn trong giỏ hàng.
@@ -63,12 +65,33 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
             throw new AppException(ErrorCode.CART_EMPTY);
         }
 
-        // 4. Tạo Order
+        // 4. Xác định địa chỉ giao hàng
+        String shippingAddressString;
+        if (request.getAddressId() != null) {
+            // User chọn địa chỉ đã lưu
+            Address address = addressRepository.findById(request.getAddressId())
+                    .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+
+            // Verify ownership (nếu là khách đã đăng nhập)
+            if (customerId != null && !address.getCustomer().getId().equals(customerId)) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            shippingAddressString = address.getFullAddress();
+        } else if (request.getShippingAddress() != null && !request.getShippingAddress().isEmpty()) {
+            // User nhập địa chỉ mới dạng string
+            shippingAddressString = request.getShippingAddress();
+        } else {
+            // Không có addressId và không có shippingAddress
+            throw new AppException(ErrorCode.FIELD_BLANK);
+        }
+
+        // 5. Tạo Order
         Order order = Order.builder()
                 .customer(customer)
                 .receiverName(request.getReceiverName())
                 .receiverPhone(request.getReceiverPhone())
-                .shippingAddress(request.getShippingAddress())
+                .shippingAddress(shippingAddressString) // Chuỗi địa chỉ đầy đủ
                 .paymentMethod(request.getPaymentMethod())
                 .email(request.getEmail()) // Lưu email để gửi xác nhận
                 .orderStatus(OrderStatus.PENDING_PAYMENT)
@@ -154,17 +177,11 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
         if ((customerEmail == null || customerEmail.isEmpty()) && customerId != null) {
             Customer fullCustomer = customerRepository.findById(customerId).orElse(null);
             if (fullCustomer != null) {
-                // Kiểm tra xem username có phải là email format không
-                String username = fullCustomer.getUsername();
-                if (username != null && username.contains("@") && username.contains(".")) {
-                    customerEmail = username;
-                    savedOrder.setEmail(customerEmail);
-                    orderRepository.save(savedOrder);
-                    log.info("Using customer username as email: {}", customerEmail);
-                } else {
-                    log.warn("Customer {} username '{}' is not a valid email format. Email will not be sent.",
-                            customerId, username);
-                }
+                // Lấy email từ user entity (luôn có vì NOT NULL)
+                customerEmail = fullCustomer.getEmail();
+                savedOrder.setEmail(customerEmail);
+                orderRepository.save(savedOrder);
+                log.info("Using customer email from database: {}", customerEmail);
             }
         }
 
