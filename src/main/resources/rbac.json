@@ -53,6 +53,7 @@
       "ADD_PRODUCT"
     ],
     "ROLE_ADMIN": [
+      "VIEW_DASHBOARD",
       "VIEW_MANAGERS",
       "ADD_MANAGER",
       "DELETE_MANAGER",

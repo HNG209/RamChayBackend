@@ -2,10 +2,13 @@ package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.request.ProductCreationRequest;
 import iuh.fit.se.dtos.response.MediaUploadResponse;
+import iuh.fit.se.dtos.response.PageResponse;
 import iuh.fit.se.dtos.response.ProductCreationResponse;
 import iuh.fit.se.entities.Category;
 import iuh.fit.se.entities.Media;
 import iuh.fit.se.entities.Product;
+import iuh.fit.se.exception.AppException;
+import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.mappers.ProductMapper;
 import iuh.fit.se.repositories.CategoryRepository;
 import iuh.fit.se.repositories.MediaRepository;
@@ -14,6 +17,10 @@ import iuh.fit.se.services.ProductService;
 import iuh.fit.se.services.cloud.CloudinaryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,10 +45,14 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @PreAuthorize("hasAuthority('ADD_PRODUCT')")
     public ProductCreationResponse createProduct(ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException {
-        String categoryName = productCreationRequest.getCategory().getCategoryName();
+        if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
+            throw new AppException(ErrorCode.PRODUCT_MEDIA_INVALID);
+        }
 
-        Category existingCategory = categoryRepository.findByCategoryName(categoryName)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        Long categoryId = productCreationRequest.getCategoryId();
+
+        Category existingCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Product product = Product.builder()
                 .name(productCreationRequest.getName())
@@ -52,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
                 .unit(productCreationRequest.getUnit())
                 .indexImage("")
                 .build();
+
 
         Product savedProduct = productRepository.save(product);
 
@@ -96,9 +108,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<ProductCreationResponse> findProductsByCategoryId(Long categoryId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+
+        return products.stream()
+                .map(productMapper::toProductCreationResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ProductCreationResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         return productMapper.toProductCreationResponse(product);
     }
@@ -108,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasAuthority('DELETE_PRODUCT')")
     public void deleteProduct(Long productId) throws IOException {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
 // Xóa ảnh trên Cloudinary (Dọn dẹp)
         Set<Media> mediaFiles = product.getMediaFiles();
@@ -130,7 +151,22 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasAuthority('EDIT_PRODUCT')")
     public ProductCreationResponse updateProduct(Long productId, ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        long currentImagesCount = product.getMediaFiles().size();
+        List<Long> idsToDelete = productCreationRequest.getImageIdsToDelete();
+        long deleteCount = 0;
+        if (idsToDelete != null && !idsToDelete.isEmpty()) {
+            deleteCount = product.getMediaFiles().stream()
+                    .map(Media::getId)
+                    .filter(idsToDelete::contains)
+                    .count();
+        }
+        long newImagesCount = (images != null) ? images.stream().filter(img -> !img.isEmpty()).count() : 0;
+
+        if ((currentImagesCount - deleteCount + newImagesCount) < 1) {
+            throw new AppException(ErrorCode.PRODUCT_MEDIA_INVALID);
+        }
 
         product.setName(productCreationRequest.getName());
         product.setDescription(productCreationRequest.getDescription());
@@ -148,12 +184,11 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        String categoryName = productCreationRequest.getCategory().getCategoryName();
-        Category category = categoryRepository.findByCategoryName(categoryName)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        Long categoryId = productCreationRequest.getCategoryId();
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         product.setCategory(category);
 
-        List<Long> idsToDelete = productCreationRequest.getImageIdsToDelete();
         if (idsToDelete != null && !idsToDelete.isEmpty()) {
             List<Media> mediasToDelete = mediaRepository.findAllById(idsToDelete);
             for (Media media : mediasToDelete) {
@@ -198,6 +233,55 @@ public class ProductServiceImpl implements ProductService {
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductCreationResponse(savedProduct);
+    }
+
+    @Override
+    @PreAuthorize("hasAuthority('PAGE_MANAGER')")
+    public PageResponse<ProductCreationResponse> getProductsWithPagination(int page, int size, String keyword) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("id").descending());
+
+        Page<Product> productPage;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            productPage = productRepository.findByNameContainingIgnoreCase(keyword, pageable);
+        } else {
+            productPage = productRepository.findAll(pageable);
+        }
+
+        List<ProductCreationResponse> dtos = productPage.getContent().stream()
+                .map(productMapper::toProductCreationResponse)
+                .collect(Collectors.toList());
+
+        return PageResponse.<ProductCreationResponse>builder()
+                .content(dtos)
+                .currentPage(page)
+                .pageSize(productPage.getSize())
+                .totalPages(productPage.getTotalPages())
+                .totalElements(productPage.getTotalElements())
+                .build();
+    }
+
+    @Override
+    public PageResponse<ProductCreationResponse> getProductsWithPaginationAndFilter(int page, int size, String keyword, Long categoryId) {
+        // 1. Tạo Pageable
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("id").descending());
+
+        // 2. Gọi Repository (Hàm searchProducts vừa viết ở trên)
+        Page<Product> productPage = productRepository.searchProducts(keyword, categoryId, pageable);
+
+        // 3. Map kết quả sang DTO
+        List<ProductCreationResponse> productResponses = productPage.getContent().stream()
+                .map(productMapper::toProductCreationResponse)
+                .toList();
+
+        // 4. Trả về
+        return PageResponse.<ProductCreationResponse>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .pageSize(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .content(productResponses)
+                .build();
     }
 
 
