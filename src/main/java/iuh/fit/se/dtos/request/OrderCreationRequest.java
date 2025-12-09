@@ -2,6 +2,7 @@ package iuh.fit.se.dtos.request;
 
 import iuh.fit.se.entities.enums.PaymentMethod;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -32,6 +33,10 @@ public class OrderCreationRequest {
 
     @NotNull(message = "Payment method is required")
     PaymentMethod paymentMethod;
+
+    // Email để gửi xác nhận đơn hàng (bắt buộc cho khách vãng lai, tùy chọn cho khách đăng nhập)
+    @Email(message = "Invalid email format")
+    String email;
 
     // Danh sách các item được chọn từ cart
     @NotEmpty(message = "Order items cannot be empty")

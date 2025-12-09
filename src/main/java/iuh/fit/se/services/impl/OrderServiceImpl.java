@@ -7,7 +7,6 @@ import iuh.fit.se.exception.AppException;
 import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.mappers.OrderMapper;
 import iuh.fit.se.repositories.CartItemRepository;
-import iuh.fit.se.repositories.CartRepository;
 import iuh.fit.se.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +24,8 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final CartItemRepository cartItemRepository;
+    private final iuh.fit.se.repositories.CustomerRepository customerRepository;
+    private final iuh.fit.se.services.EmailService emailService;
 
     /**
      * Tạo đơn hàng mới từ các items được chọn trong giỏ hàng.
@@ -41,28 +42,39 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
     @Transactional
     public OrderCreationResponse createOrder(OrderCreationRequest request, Long customerId)
     {
-        // 1. Validate: nếu có customerId thì phải có trong DB
+        // 1. Validate: nếu là khách vãng lai thì email là bắt buộc
+        if (customerId == null) {
+            if (request.getEmail() == null || request.getEmail().isEmpty()) {
+                throw new AppException(ErrorCode.EMAIL_INVALID);
+            }
+            if (!isValidEmail(request.getEmail())) {
+                throw new AppException(ErrorCode.EMAIL_INVALID);
+            }
+        }
+
+        // 2. Validate: nếu có customerId thì phải có trong DB
         Customer customer = null;
         if (customerId != null) {
             customer = Customer.builder().id(customerId).build();
         }
 
-        // 2. Validate items không rỗng
+        // 3. Validate items không rỗng
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new AppException(ErrorCode.CART_EMPTY);
         }
 
-        // 3. Tạo Order
+        // 4. Tạo Order
         Order order = Order.builder()
                 .customer(customer)
                 .receiverName(request.getReceiverName())
                 .receiverPhone(request.getReceiverPhone())
                 .shippingAddress(request.getShippingAddress())
                 .paymentMethod(request.getPaymentMethod())
+                .email(request.getEmail()) // Lưu email để gửi xác nhận
                 .orderStatus(OrderStatus.PENDING_PAYMENT)
                 .build();
 
-        // 4. Tạo OrderDetail từ các items được chọn
+        // 5. Tạo OrderDetail từ các items được chọn
         List<OrderDetail> orderDetails = new ArrayList<>();
         List<CartItem> cartItemsToDelete = new ArrayList<>();
         double total = 0.0;
@@ -119,14 +131,14 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
             }
         }
 
-        // 5. Set orderDetails và total cho order
+        // 6. Set orderDetails và total cho order
         order.setOrderDetails(orderDetails);
         order.setTotal(total);
 
-        // 6. Lưu order (cascade sẽ lưu orderDetails)
+        // 7. Lưu order (cascade sẽ lưu orderDetails)
         Order savedOrder = orderRepository.save(order);
 
-        // 7. Xóa các CartItem đã checkout hoàn toàn
+        // 8. Xóa các CartItem đã checkout hoàn toàn
         if (!cartItemsToDelete.isEmpty()) {
             cartItemRepository.deleteAll(cartItemsToDelete);
         }
@@ -134,6 +146,40 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
         log.info("Order created successfully. OrderId: {}, Total: {}, Items: {}, Customer: {}",
                 savedOrder.getId(), savedOrder.getTotal(), orderDetails.size(),
                 customerId != null ? customerId : "Guest");
+
+        // 9. Gửi email xác nhận đơn hàng
+        String customerEmail = savedOrder.getEmail();
+
+        // Nếu không có email trong request nhưng là khách đã đăng nhập, lấy từ database
+        if ((customerEmail == null || customerEmail.isEmpty()) && customerId != null) {
+            Customer fullCustomer = customerRepository.findById(customerId).orElse(null);
+            if (fullCustomer != null) {
+                // Kiểm tra xem username có phải là email format không
+                String username = fullCustomer.getUsername();
+                if (username != null && username.contains("@") && username.contains(".")) {
+                    customerEmail = username;
+                    savedOrder.setEmail(customerEmail);
+                    orderRepository.save(savedOrder);
+                    log.info("Using customer username as email: {}", customerEmail);
+                } else {
+                    log.warn("Customer {} username '{}' is not a valid email format. Email will not be sent.",
+                            customerId, username);
+                }
+            }
+        }
+
+        // Gửi email nếu có địa chỉ email hợp lệ
+        if (customerEmail != null && !customerEmail.isEmpty() && isValidEmail(customerEmail)) {
+            try {
+                emailService.sendOrderConfirmationEmail(savedOrder, customerEmail);
+                log.info("Order confirmation email queued for {}", customerEmail);
+            } catch (Exception e) {
+                log.error("Failed to queue order confirmation email: {}", e.getMessage());
+                // Không throw exception để không ảnh hưởng đến việc tạo đơn hàng
+            }
+        } else {
+            log.warn("No valid email address provided for order {}. Email will not be sent.", savedOrder.getId());
+        }
 
         return orderMapper.toOrderCreationResponse(savedOrder);
     }
@@ -171,5 +217,40 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
         return orderMapper.toOrderCreationResponse(order);
     }
 
+    /**
+     * Lấy chi tiết đơn hàng cho khách vãng lai dựa trên orderId và email.
+     * Không yêu cầu authentication.
+     * @param orderId
+     * @param email
+     * @return
+     * @author Duc
+     * @date 12/09/2024
+     */
+    @Override
+    public OrderCreationResponse getGuestOrderById(Long orderId, String email) {
+        if (email == null || email.isEmpty()) {
+            throw new AppException(ErrorCode.EMAIL_INVALID);
+        }
+
+        Order order = orderRepository.findByIdAndEmailForGuest(orderId, email.toLowerCase().trim())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        log.info("Retrieved guest order {} with email {}", orderId, email);
+        return orderMapper.toOrderCreationResponse(order);
+    }
+
+    /**
+     * Validate email format using simple regex
+     * @param email
+     * @return true if email is valid, false otherwise
+     */
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        // Simple email validation: contains @ and . after @
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        return email.matches(emailRegex);
+    }
 
 }
