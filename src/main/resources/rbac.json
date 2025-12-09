@@ -39,6 +39,8 @@
   ],
   "roles": {
     "ROLE_MANAGER": [
+      "VIEW_DASHBOARD",
+
       "ADD_CATEGORY",
       "DELETE_CATEGORY",
       "ADD_PRODUCT",
@@ -52,6 +54,8 @@
       "ADD_PRODUCT"
     ],
     "ROLE_ADMIN": [
+      "VIEW_DASHBOARD",
+
       "VIEW_MANAGERS",
       "ADD_MANAGER",
       "DELETE_MANAGER",

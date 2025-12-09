@@ -1,7 +1,6 @@
 package iuh.fit.se.controllers;
 
-import iuh.fit.se.dtos.request.EmbeddingRequest;
-import iuh.fit.se.entities.Product;
+import iuh.fit.se.dtos.request.ProductEmbeddingRequest;
 import iuh.fit.se.services.springai.EmbeddingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.document.Document;
@@ -15,13 +14,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EmbeddingController {
     private final EmbeddingService embeddingService;
-
-    @PostMapping
-    public String embedProduct(@RequestBody EmbeddingRequest product) {
-        embeddingService.createEmbedding(product);
-
-        return "ok";
-    }
+//    @PostMapping(name = "/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+//    public String image(@RequestPart MultipartFile file) {
+//        embeddingService.embedImage(file);
+//        return "2048";
+//    }
 
     @GetMapping("/search")
     public List<Document> search(@RequestParam String q) {

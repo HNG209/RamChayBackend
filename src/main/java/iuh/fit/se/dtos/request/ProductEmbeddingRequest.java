@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EmbeddingRequest {
+public class ProductEmbeddingRequest {
     Long id;
     String name;
     String description;

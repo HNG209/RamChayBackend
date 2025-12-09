@@ -1,6 +1,7 @@
 package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.request.ProductCreationRequest;
+import iuh.fit.se.dtos.request.ProductEmbeddingRequest;
 import iuh.fit.se.dtos.response.MediaUploadResponse;
 import iuh.fit.se.dtos.response.ProductCreationResponse;
 import iuh.fit.se.entities.Category;
@@ -12,6 +13,7 @@ import iuh.fit.se.repositories.MediaRepository;
 import iuh.fit.se.repositories.ProductRepository;
 import iuh.fit.se.services.ProductService;
 import iuh.fit.se.services.cloud.CloudinaryService;
+import iuh.fit.se.services.springai.EmbeddingService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +35,7 @@ public class ProductServiceImpl implements ProductService {
     private final MediaRepository mediaRepository;
     private final ProductMapper productMapper;
     private final CloudinaryService cloudinaryService;
+    private final EmbeddingService embeddingService;
 
     @Override
     @Transactional
@@ -82,6 +85,12 @@ public class ProductServiceImpl implements ProductService {
             savedProduct.setIndexImage(firstImageUrl); // <--- SỬA
             savedProduct = productRepository.save(savedProduct);
         }
+
+        embeddingService.createEmbedding(ProductEmbeddingRequest.builder()
+                .id(savedProduct.getId())
+                .name(savedProduct.getName())
+                .description(savedProduct.getDescription())
+                .build());
 
         return productMapper.toProductCreationResponse(savedProduct);
     }
