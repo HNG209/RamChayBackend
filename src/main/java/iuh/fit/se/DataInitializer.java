@@ -4,13 +4,11 @@ import iuh.fit.se.entities.Role;
 import iuh.fit.se.entities.User;
 import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.repositories.UserRepository;
-import iuh.fit.se.services.RoleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -33,12 +31,14 @@ public class DataInitializer implements CommandLineRunner {
 
             User admin = User.builder()
                     .username("admin")
+                    .fullName("System Administrator")
                     .password(BCrypt.hashpw("admin123", BCrypt.gensalt()))
+                    .active(true)
                     .roles(Set.of(adminRole))
                     .build();
 
             userRepository.save(admin);
-            System.out.println("Admin initialized");
+            System.out.println("Admin initialized - Admin does not have email (only Customers have email)");
         }
     }
 }

@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface CustomerRepository extends JpaRepository<Customer, Long> {// repository của sub class
     Optional<Customer> findByUsername(String username);
     Optional<Customer> getCustomerById(Long id);
-
+    Optional<Customer> findByEmail(String email); // Tìm customer theo email (có thể trả về nhiều kết quả nếu trùng)
 }
