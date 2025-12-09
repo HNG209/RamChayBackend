@@ -45,6 +45,10 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @PreAuthorize("hasAuthority('ADD_PRODUCT')")
     public ProductCreationResponse createProduct(ProductCreationRequest productCreationRequest, List<MultipartFile> images) throws IOException {
+        if (images == null || images.isEmpty() || images.stream().allMatch(MultipartFile::isEmpty)) {
+            throw new AppException(ErrorCode.PRODUCT_MEDIA_INVALID);
+        }
+
         Long categoryId = productCreationRequest.getCategoryId();
 
         Category existingCategory = categoryRepository.findById(categoryId)
@@ -149,6 +153,21 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
+        long currentImagesCount = product.getMediaFiles().size();
+        List<Long> idsToDelete = productCreationRequest.getImageIdsToDelete();
+        long deleteCount = 0;
+        if (idsToDelete != null && !idsToDelete.isEmpty()) {
+            deleteCount = product.getMediaFiles().stream()
+                    .map(Media::getId)
+                    .filter(idsToDelete::contains)
+                    .count();
+        }
+        long newImagesCount = (images != null) ? images.stream().filter(img -> !img.isEmpty()).count() : 0;
+
+        if ((currentImagesCount - deleteCount + newImagesCount) < 1) {
+            throw new AppException(ErrorCode.PRODUCT_MEDIA_INVALID);
+        }
+
         product.setName(productCreationRequest.getName());
         product.setDescription(productCreationRequest.getDescription());
         product.setPrice(productCreationRequest.getPrice());
@@ -170,7 +189,6 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
         product.setCategory(category);
 
-        List<Long> idsToDelete = productCreationRequest.getImageIdsToDelete();
         if (idsToDelete != null && !idsToDelete.isEmpty()) {
             List<Media> mediasToDelete = mediaRepository.findAllById(idsToDelete);
             for (Media media : mediasToDelete) {

@@ -59,14 +59,13 @@ public enum ErrorCode {
     PERMISSION_NAME_INVALID(40019, "[40019] Role name must not be null", HttpStatus.BAD_REQUEST),
     PERMISSION_NAME_SIZE_INVALID(40019, "[40019] Role name must contain only uppercase letters and underscores (e.g., ADD_VIEW)", HttpStatus.BAD_REQUEST),
 
-    //Phần chính của mình
     PRODUCT_NAME_INVALID(5001, "[5001] Product name must be at least 3 characters long", HttpStatus.BAD_REQUEST),
     PRODUCT_CATEGORY_INVALID(5002, "[5002] Product's category must be null or empty", HttpStatus.BAD_REQUEST),
     PRODUCT_PRICE_MISSING(5003, "[5003] Product's price cannot be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_PRICE_INVALID(5004, "[5004] Product's price must be a number", HttpStatus.BAD_REQUEST),
+    PRODUCT_PRICE_INVALID(5004, "[5004] Product's price must be a positive number", HttpStatus.BAD_REQUEST),
     PRODUCT_UNIT_INVALID(5005, "[5005] Product's unit cannot be null", HttpStatus.BAD_REQUEST),
     PRODUCT_STOCK_MISSING(5006, "[5006] Product's stock cannot be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_STOCK_INVALID(5007, "[5007] Product's stock must be a number ", HttpStatus.BAD_REQUEST),
+    PRODUCT_STOCK_INVALID(5007, "[5007] Product's stock must be a positive number ", HttpStatus.BAD_REQUEST),
     PRODUCT_MEDIA_INVALID(5008, "[5008] Product's media should contain atleast 1 image", HttpStatus.BAD_REQUEST),
     CATEGORY_PRODUCT_EXIST(5009, "[5009] Category is still existing in some products", HttpStatus.BAD_REQUEST),
     CATEGORY_NAME_INVALID(5010, "[5010] Category name cannot be null", HttpStatus.BAD_REQUEST),
