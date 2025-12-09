@@ -1,12 +1,16 @@
 package iuh.fit.se.services.impl;
 
 import iuh.fit.se.dtos.request.PermissionCreationRequest;
+import iuh.fit.se.dtos.request.PermissionDeleteRequest;
 import iuh.fit.se.dtos.response.PermissionCreationResponse;
+import iuh.fit.se.dtos.response.PermissionDeleteResponse;
 import iuh.fit.se.dtos.response.PermissionPaginationResponse;
-import iuh.fit.se.dtos.response.RolePaginationResponse;
 import iuh.fit.se.entities.Permission;
+import iuh.fit.se.exception.AppException;
+import iuh.fit.se.exception.ErrorCode;
 import iuh.fit.se.mappers.PermissionMapper;
 import iuh.fit.se.repositories.PermissionRepository;
+import iuh.fit.se.repositories.RoleRepository;
 import iuh.fit.se.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +29,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     private final PermissionRepository permissionRepository;
     private final PermissionMapper permissionMapper;
+    private final RoleRepository roleRepository;
 
     @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
     public List<Permission> getAllPermissions() {
@@ -37,8 +42,8 @@ public class PermissionServiceImpl implements PermissionService {
     public PermissionCreationResponse createPermission(PermissionCreationRequest permissionCreationRequest) {
         Optional<Permission> permissionOptional = permissionRepository.findByName(permissionCreationRequest.getName());
 
-//        if (permissionOptional.isPresent())
-//            throw new AppException(ErrorCode.PERMISSION_EXISTED);
+        if (permissionOptional.isPresent())
+            throw new AppException(ErrorCode.PERMISSION_EXISTED);
 
         Permission newPermission = new Permission();
         newPermission.setName(permissionCreationRequest.getName());
@@ -46,6 +51,7 @@ public class PermissionServiceImpl implements PermissionService {
         Permission savedPermission = permissionRepository.save(newPermission);
         return permissionMapper.toPermissionCreationResponse(savedPermission);
     }
+
     @PreAuthorize("hasAuthority('VIEW_PERMISSIONS')")
     @Override
     public PermissionPaginationResponse getPermission(int page, int pageSize, String keyWord) {
@@ -74,6 +80,29 @@ public class PermissionServiceImpl implements PermissionService {
                 .numberOfElements(permissionPage.getNumberOfElements())
                 .build();
     }
+
+    @Override
+    @PreAuthorize("hasAuthority('DELETE_PERMISSION')")
+    @Transactional
+    public PermissionDeleteResponse deletePermission(PermissionDeleteRequest id) {
+        Permission permission = permissionRepository.findById(id.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
+
+        // Kiểm tra permission có đang được Role sử dụng hay không
+        boolean isUsed = roleRepository.existsByPermissions_Id(id.getId());
+        if (isUsed) {
+            throw new AppException(ErrorCode.PERMISSION_IN_USE);
+        }
+        permissionRepository.deleteById(id.getId());
+
+        // 3. Trả về response
+        return PermissionDeleteResponse.builder()
+                .id(permission.getId())
+                .name(permission.getName())
+                .build();
+
+    }
+
 
 }
 

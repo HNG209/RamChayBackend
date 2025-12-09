@@ -35,7 +35,8 @@
     "CREATE_PERMISSION",
     "DELETE_PERMISSION",
     "PAGE_ROLE",
-    "PAGE_PERMISSION"
+    "PAGE_PERMISSION",
+    "DELETE_PERMISSION"
   ],
   "roles": {
     "ROLE_MANAGER": [
@@ -69,7 +70,9 @@
       "CREATE_PERMISSION",
       "DELETE_PERMISSION",
       "PAGE_ROLE",
-      "PAGE_PERMISSION"
+      "PAGE_PERMISSION",
+      "VIEW_DASHBOARD",
+      "DELETE_PERMISSION"
     ]
   }
 }

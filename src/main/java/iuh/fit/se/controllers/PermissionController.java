@@ -1,8 +1,10 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.PermissionCreationRequest;
+import iuh.fit.se.dtos.request.PermissionDeleteRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.PermissionCreationResponse;
+import iuh.fit.se.dtos.response.PermissionDeleteResponse;
 import iuh.fit.se.dtos.response.PermissionPaginationResponse;
 import iuh.fit.se.entities.Permission;
 import iuh.fit.se.services.impl.PermissionServiceImpl;
@@ -43,6 +45,17 @@ public class PermissionController {
         // Gọi Service với tham số keyword mới
         return ApiResponse.<PermissionPaginationResponse>builder()
                 .result(permissionService.getPermission(page, pageSize, keyWord))
+                .build();
+    }
+
+
+    @PostMapping("/delete/{id}")
+    public ApiResponse<PermissionDeleteResponse> deleteCategory(@PathVariable("id") Long id) {
+        PermissionDeleteRequest request = new PermissionDeleteRequest();
+        request.setId(id);
+
+        return ApiResponse.<PermissionDeleteResponse>builder()
+                .result(permissionService.deletePermission(request))
                 .build();
     }
 
