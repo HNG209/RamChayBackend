@@ -35,5 +35,6 @@ public class Cart {
     Customer customer;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @ToString.Exclude
     List<CartItem> cartItems;
 }

@@ -38,18 +38,34 @@ public class Order {
     @Column(name = "payment_method")
     PaymentMethod paymentMethod;
 
+    @Column(name = "receiver_name")
+    String receiverName;
+
+    @Column(name = "receiver_phone")
+    String receiverPhone;
+
     @Column(name = "shipping_address")
     String shippingAddress;
 
-    @Column(name = "customer_phone")
-    String customerPhone;
+    @Column(name = "email")
+    String email; // Email để gửi xác nhận đơn hàng (cho cả khách đăng nhập và khách vãng lai)
 
     // Một khách hàng có thể có nhiều đơn hàng
+    // Cho phép customer null để xử lý trường hợp khách vãng lai
     @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
+    @JoinColumn(name = "customer_id", nullable = true)
     Customer customer;
 
     // Một đơn hàng có nhiều chi tiết
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrderDetail> orderDetails;
+
+    // Thiết lập giá trị mặc định trước khi lưu vào cơ sở dữ liệu
+    @PrePersist
+    protected void onCreate() {
+        orderDate = LocalDateTime.now();
+        if (orderStatus == null) {
+            orderStatus = OrderStatus.PENDING_PAYMENT;
+        }
+    }
 }

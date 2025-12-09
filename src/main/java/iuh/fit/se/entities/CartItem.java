@@ -19,16 +19,18 @@ public class CartItem {
 
     int quantity;
 
-    @Column(name = "unit_price")
-    double unitPrice;
+//    @Column(name = "unit_price")
+//    double unitPrice;
 
     double subtotal;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @ToString.Exclude
     Product product;
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
+//    @ToString.Exclude
     Cart cart;
 }
