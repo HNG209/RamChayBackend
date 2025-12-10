@@ -1,9 +1,11 @@
 package iuh.fit.se.controllers;
 
 import iuh.fit.se.dtos.request.OrderCreationRequest;
+import iuh.fit.se.dtos.request.OrderStatusUpdateRequest;
 import iuh.fit.se.dtos.response.ApiResponse;
 import iuh.fit.se.dtos.response.OrderCreationResponse;
 import iuh.fit.se.services.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -88,6 +90,56 @@ public class OrderController {
                                                                 @RequestParam String email) {
         return ApiResponse.<OrderCreationResponse>builder()
                 .result(orderService.getGuestOrderById(orderId, email))
+                .build();
+    }
+
+    // ==================== MANAGER ENDPOINTS ====================
+
+    /**
+     * Lấy tất cả đơn hàng trong hệ thống (chỉ dành cho manager).
+     * Yêu cầu permission VIEW_ALL_ORDERS.
+     * @return Danh sách tất cả đơn hàng
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @GetMapping("/manager/all")
+    public ApiResponse<List<OrderCreationResponse>> getAllOrdersForManager() {
+        return ApiResponse.<List<OrderCreationResponse>>builder()
+                .result(orderService.getAllOrders())
+                .build();
+    }
+
+    /**
+     * Lấy chi tiết đơn hàng theo ID (chỉ dành cho manager).
+     * Manager có thể xem bất kỳ đơn hàng nào.
+     * Yêu cầu permission VIEW_ALL_ORDERS.
+     * @param orderId ID của đơn hàng
+     * @return Chi tiết đơn hàng
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @GetMapping("/manager/{orderId}")
+    public ApiResponse<OrderCreationResponse> getOrderByIdForManager(@PathVariable Long orderId) {
+        return ApiResponse.<OrderCreationResponse>builder()
+                .result(orderService.getOrderByIdForManager(orderId))
+                .build();
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng (chỉ dành cho manager).
+     * Yêu cầu permission UPDATE_ORDER_STATUS.
+     * @param orderId ID của đơn hàng cần cập nhật
+     * @param request Thông tin trạng thái mới
+     * @return Đơn hàng sau khi cập nhật
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @PutMapping("/manager/{orderId}/status")
+    public ApiResponse<OrderCreationResponse> updateOrderStatus(
+            @PathVariable Long orderId,
+            @Valid @RequestBody OrderStatusUpdateRequest request) {
+        return ApiResponse.<OrderCreationResponse>builder()
+                .result(orderService.updateOrderStatus(orderId, request))
                 .build();
     }
 

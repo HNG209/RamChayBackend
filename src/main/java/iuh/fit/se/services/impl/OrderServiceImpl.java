@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -253,6 +252,64 @@ public class OrderServiceImpl implements iuh.fit.se.services.OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         log.info("Retrieved guest order {} with email {}", orderId, email);
+        return orderMapper.toOrderCreationResponse(order);
+    }
+
+    /**
+     * Lấy tất cả đơn hàng trong hệ thống (dành cho manager).
+     * @return Danh sách tất cả đơn hàng
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @Override
+    @PreAuthorize("hasAuthority('VIEW_ALL_ORDERS')")
+    public List<OrderCreationResponse> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        log.info("Manager retrieved {} orders", orders.size());
+        return orders.stream()
+                .map(orderMapper::toOrderCreationResponse)
+                .toList();
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng (dành cho manager).
+     * @param orderId ID của đơn hàng cần cập nhật
+     * @param request Thông tin trạng thái mới
+     * @return OrderCreationResponse với trạng thái đã cập nhật
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @Override
+    @PreAuthorize("hasAuthority('UPDATE_ORDER_STATUS')")
+    @Transactional
+    public OrderCreationResponse updateOrderStatus(Long orderId, iuh.fit.se.dtos.request.OrderStatusUpdateRequest request) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        OrderStatus oldStatus = order.getOrderStatus();
+        order.setOrderStatus(request.getOrderStatus());
+
+        Order updatedOrder = orderRepository.save(order);
+
+        log.info("Manager updated order {} status from {} to {}", orderId, oldStatus, request.getOrderStatus());
+        return orderMapper.toOrderCreationResponse(updatedOrder);
+    }
+
+    /**
+     * Lấy chi tiết đơn hàng theo ID (dành cho manager).
+     * Manager có thể xem bất kỳ đơn hàng nào.
+     * @param orderId ID của đơn hàng
+     * @return OrderCreationResponse
+     * @author Duc
+     * @date 12/10/2025
+     */
+    @Override
+    @PreAuthorize("hasAuthority('VIEW_ALL_ORDERS')")
+    public OrderCreationResponse getOrderByIdForManager(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        log.info("Manager retrieved order {}", orderId);
         return orderMapper.toOrderCreationResponse(order);
     }
 

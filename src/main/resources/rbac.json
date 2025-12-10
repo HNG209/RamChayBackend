@@ -14,6 +14,8 @@
 
     "VIEW_ORDER",
     "CREATE_ORDER",
+    "VIEW_ALL_ORDERS",
+    "UPDATE_ORDER_STATUS",
 
     "VIEW_MANAGERS",
     "ADD_MANAGER",
@@ -47,7 +49,9 @@
       "ADD_PRODUCT",
       "EDIT_PRODUCT",
       "DELETE_PRODUCT",
-      "VIEW_ORDER"
+      "VIEW_ORDER",
+      "VIEW_ALL_ORDERS",
+      "UPDATE_ORDER_STATUS"
     ],
     "ROLE_CUSTOMER": [
       "VIEW_ORDER",
@@ -76,7 +80,11 @@
       "PAGE_ROLE",
       "PAGE_PERMISSION",
       "VIEW_DASHBOARD",
-      "DELETE_PERMISSION"
+      "DELETE_PERMISSION",
+
+      "VIEW_ORDER",
+      "VIEW_ALL_ORDERS",
+      "UPDATE_ORDER_STATUS"
     ]
   }
 }
