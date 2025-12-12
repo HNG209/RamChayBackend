@@ -12,6 +12,7 @@ public enum ErrorCode {
     USERNAME_EXISTED(1001, "[1001] Username existed", HttpStatus.BAD_REQUEST),
     USERNAME_NOT_FOUND(1002, "[1002] Username not found", HttpStatus.NOT_FOUND),
     USER_NOT_FOUND(1003, "[1003] User not found", HttpStatus.NOT_FOUND),
+    EMAIL_EXISTED(1004, "[1004] Email already exists", HttpStatus.BAD_REQUEST),
     ROLE_EXISTED(2001, "[2001] Role existed", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(2002, "[2002] Role not found", HttpStatus.NOT_FOUND),
     PERMISSION_NOT_FOUND(2003, "[2003] Permission not found", HttpStatus.NOT_FOUND),

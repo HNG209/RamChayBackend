@@ -21,6 +21,8 @@ public class Product {
 
     String name;
 
+    @Lob
+    @Column(columnDefinition = "TEXT")
     String description;
 
     double price;

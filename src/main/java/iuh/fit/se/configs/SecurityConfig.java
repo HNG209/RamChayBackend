@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth // [Giai đoạn 3]: cho phép đi qua nếu là public
+//                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow CORS preflight requests
                         .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/orders/*/guest").permitAll() // Cho phép khách vãng lai xem đơn hàng
                         .requestMatchers(
@@ -49,6 +50,9 @@ public class SecurityConfig {
                                 "/cart-items/**",
                                 "/orders", // Cho phép khách vãng lai tạo đơn hàng
                                 "/carts",
+                                "/embedding/**",
+                                "/chat/**",
+                                "/products/search",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html").permitAll() // Không cần điền context path /api
@@ -89,6 +93,13 @@ public class SecurityConfig {
                 "Origin",
                 "Access-Control-Request-Method",
                 "Access-Control-Request-Headers"));
+
+//        // Các header có thể exposed cho client
+//        configuration.setExposedHeaders(List.of(
+//                "Authorization",
+//                "Content-Type",
+//                "Access-Control-Allow-Origin",
+//                "Access-Control-Allow-Credentials"));
 
         // Cho phép gửi Cookie/Credentials
         configuration.setAllowCredentials(true);

@@ -65,8 +65,11 @@ public class AuthServiceImpl implements AuthService {
     public CustomerRegistrationResponse register(CustomerRegistrationRequest request) {
         Customer customer = new Customer();
 
+        // Validate username đã tồn tại
         if(customerRepository.findByUsername(request.getUsername()).isPresent())
             throw new AppException(ErrorCode.USERNAME_EXISTED);
+
+        // Email có thể trùng - không validate
 
         Role role = roleService.findByName("ROLE_CUSTOMER");
 
@@ -74,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
         String hashed = BCrypt.hashpw(request.getPassword(), BCrypt.gensalt());
         customer.setUsername(request.getUsername());
         customer.setPassword(hashed);
-        customer.setEmail(request.getEmail()); // Set email if provided
+        customer.setEmail(request.getEmail()); // Email bắt buộc cho Customer (có thể trùng)
         customer.setFullName(request.getFullName());
         customer.setPhones(Set.of(request.getPhone()));
 
@@ -244,7 +247,6 @@ public class AuthServiceImpl implements AuthService {
         MyProfileResponse response = MyProfileResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .email(user.getEmail()) // Use actual email field from User entity
                 .fullName(user.getFullName())
                 .roles(user.getRoles().stream()
                         .map(Role::getName)
@@ -252,7 +254,9 @@ public class AuthServiceImpl implements AuthService {
                 .permissions(permissions)
                 .build();
 
+        // Email chỉ có ở Customer, không có ở User (Admin)
         if (user instanceof Customer customer) {
+            response.setEmail(customer.getEmail()); // Lấy email từ Customer
             response.setPhones(customer.getPhones());
             response.setAddresses(customer.getAddresses());
         }

@@ -24,5 +24,7 @@ public interface ProductService {
 
     PageResponse<ProductCreationResponse> getProductsWithPagination(int page, int size, String keyword);
 
+    List<ProductCreationResponse> semanticSearch(String query);
+
     PageResponse<ProductCreationResponse> getProductsWithPaginationAndFilter(int page, int size, String keyword, Long categoryId);
 }

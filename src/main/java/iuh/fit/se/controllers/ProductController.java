@@ -107,7 +107,7 @@ public class ProductController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ApiResponse<ProductCreationResponse> updateProduct (
+    public ApiResponse<ProductCreationResponse> updateProduct(
             @PathVariable Long id,
             @Parameter(schema = @Schema(implementation = ProductCreationRequest.class))
             @RequestPart("product") String productString,
@@ -136,6 +136,13 @@ public class ProductController {
     ) {
         return ApiResponse.<PageResponse<ProductCreationResponse>>builder()
                 .result(productService.getProductsWithPaginationAndFilter(page, size, keyword, categoryId))
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<ProductCreationResponse>> semanticSearch(@RequestParam String query) {
+        return ApiResponse.<List<ProductCreationResponse>>builder()
+                .result(productService.semanticSearch(query))
                 .build();
     }
 }
