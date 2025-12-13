@@ -43,7 +43,7 @@ public class RagServiceImpl implements RagService {
                 YÊU CẦU:
                 - Trả lời tự nhiên, thân thiện
                 - Chỉ dựa vào danh sách món ăn, không bịa thêm
-                - Chỉ trả lời tên món ăn
+                - Chỉ trả lời tên món ăn, không nhắc ID của món đó
                 - Cuối cùng, hãy in ra danh sách ID của món liên quan theo định dạng:
                   IDS=[id1,id2,id3]
 
