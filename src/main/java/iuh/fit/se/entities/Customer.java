@@ -26,7 +26,7 @@ public class Customer extends User {
     @Column(name = "number", nullable = false)
     Set<String> phones;
 
-    @OneToMany(mappedBy = "customer", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     Set<Address> addresses;
 }
 

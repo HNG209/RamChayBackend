@@ -78,14 +78,19 @@ public class RagServiceImpl implements RagService {
 
         // 6. Return response
         return RagResponse.builder()
-                .answer(llmResponse)
+                .answer(removeIdsFromAnswer(llmResponse))
                 .responseList(products)
                 .build();
     }
 
+    private String removeIdsFromAnswer(String text) {
+        // Xoá cả dòng chứa IDS=[...]
+        return text.replaceAll("\\s*IDS=\\[.*?]", "").trim();
+    }
+
     private List<Long> extractIds(String text) {
         // Example target: IDS=[1,2,5]
-        Pattern pattern = Pattern.compile("IDS=\\[(.*?)\\]");
+        Pattern pattern = Pattern.compile("IDS=\\[(.*?)]");
         Matcher matcher = pattern.matcher(text);
 
         if (!matcher.find()) return List.of();
